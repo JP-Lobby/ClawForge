@@ -1,7 +1,7 @@
 import { useApi } from '../hooks/useApi'
 import { useWebSocket } from '../hooks/useWebSocket'
 import { fetchTaskStats, fetchAllAgentSpends, fetchActivity } from '../api/endpoints'
-import { TaskStats, ActivityEntry } from '../api/types'
+import { TaskStats } from '../api/types'
 import { LoadingState, ErrorState } from '../components/ErrorState'
 import ActivityFeed from '../components/ActivityFeed'
 import BudgetGauge from '../components/BudgetGauge'
@@ -32,7 +32,7 @@ function StatCard({ icon, label, value, sub, color = 'text-indigo-400' }: StatCa
 
 export default function DashboardPage() {
   const { data: stats, loading: statsLoading, error: statsError, refresh: refreshStats } = useApi<TaskStats>(fetchTaskStats, [])
-  const { data: budgetData, loading: budgetLoading, refresh: refreshBudget } = useApi(fetchAllAgentSpends, [])
+  const { data: budgetData, loading: budgetLoading } = useApi(fetchAllAgentSpends, [])
   const { data: activity, loading: activityLoading, refresh: refreshActivity } = useApi(
     () => fetchActivity({ limit: 20 }),
     []

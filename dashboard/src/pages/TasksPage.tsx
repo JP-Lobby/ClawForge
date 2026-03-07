@@ -6,7 +6,7 @@ import { fetchTasks, createTask } from '../api/endpoints'
 import { Task, TaskStatus, TaskPriority } from '../api/types'
 import { LoadingState, ErrorState } from '../components/ErrorState'
 import TaskCard from '../components/TaskCard'
-import { Plus, Filter, Search } from 'lucide-react'
+import { Plus, Search } from 'lucide-react'
 
 const STATUS_OPTIONS: TaskStatus[] = ['todo', 'in_progress', 'blocked', 'done', 'failed', 'backlog']
 const PRIORITY_OPTIONS: TaskPriority[] = ['critical', 'high', 'medium', 'low']

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useApi } from '../hooks/useApi'
 import { fetchMemory, updateMemory, clearMemory, fetchChannels } from '../api/endpoints'
 import { LoadingState, ErrorState } from '../components/ErrorState'
-import { Save, Trash2, ChevronDown, ChevronRight } from 'lucide-react'
+import { Save, ChevronDown, ChevronRight } from 'lucide-react'
 
 function MemoryEditor({ channelId }: { channelId: string }) {
   const { data, loading, error, refresh } = useApi<{ content: string; sizeBytes: number }>(

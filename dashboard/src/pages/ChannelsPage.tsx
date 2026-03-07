@@ -26,7 +26,7 @@ function ChannelDetail({ channel }: { channel: Channel }) {
             <div>
               <span className="text-xs text-gray-500 uppercase tracking-wide">Providers</span>
               <div className="text-gray-300 font-mono text-xs mt-0.5">
-                {channel.orchestration.providers?.map((p: any) => p.name ?? p).join(', ') ?? '—'}
+                {(channel.orchestration.providers as any[])?.map((p: any) => p.name ?? p).join(', ') ?? '—'}
               </div>
             </div>
           </>
