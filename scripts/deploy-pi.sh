@@ -24,6 +24,9 @@ git reset --hard "origin/$BRANCH"
 echo "==> Installing dependencies..."
 pnpm install --no-frozen-lockfile
 
+echo "==> Rebuilding native addons..."
+pnpm rebuild better-sqlite3
+
 if [ "$SKIP_BUILD" = false ]; then
   echo "==> Building TypeScript..."
   pnpm build
