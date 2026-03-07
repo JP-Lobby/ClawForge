@@ -1,0 +1,10 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #1e1b4b; }
+::-webkit-scrollbar-thumb { background: #4338ca; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #6366f1; }
+
+body { font-family: 'JetBrains Mono', ui-monospace, monospace; background: #0f0e23; color: #e2e8f0; }

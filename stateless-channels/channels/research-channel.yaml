@@ -1,0 +1,22 @@
+# ClawForge Research Channel Config
+# Pre-built config for a research-focused Discord channel with agent orchestration.
+
+channelId: "YOUR_RESEARCH_CHANNEL_ID_HERE"
+mode: "stateless"
+enabled: true
+memoryFile: "research-channel.md"
+historyOnCommand: false
+maxMemoryPairs: 10
+provider: "anthropic"
+model: "claude-sonnet-4-6"
+
+customPrompt: |
+  You are a research assistant with access to web search capabilities.
+  Use the research tool to find current, accurate information.
+  Always cite your sources and acknowledge uncertainty when present.
+
+orchestration:
+  agent: "triage"
+  maxTurns: 25
+  context:
+    channelType: "research"
