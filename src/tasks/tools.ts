@@ -1,5 +1,5 @@
 import type { AnyAgentTool } from '../orchestration/handoff.js';
-import type { TaskPriority, TasksConfig } from './types.js';
+import type { TaskPriority, TaskStatus, TasksConfig } from './types.js';
 import { openTasksDb, DEFAULT_DB_PATH } from './store.js';
 import { createTask, getTask, listTasks, updateTask, releaseCheckout } from './service.js';
 import { createSubtask } from './decomposer.js';
@@ -86,8 +86,8 @@ export function createTaskTools(opts: { agentId: string; config?: TasksConfig })
     },
     execute: async (input) => {
       const db = openTasksDb(dbPath);
-      const assigned = listTasks(db, { assigneeAgentId: opts.agentId, status: input['status'] as TaskPriority | undefined });
-      const unassigned = listTasks(db, { status: (input['status'] as TaskPriority) ?? 'todo' }).filter((t) => !t.assigneeAgentId);
+      const assigned = listTasks(db, { assigneeAgentId: opts.agentId, status: input['status'] as TaskStatus | undefined });
+      const unassigned = listTasks(db, { status: (input['status'] as TaskStatus) ?? 'todo' }).filter((t) => !t.assigneeAgentId);
       return JSON.stringify({ assigned, unassigned });
     },
   };
@@ -108,7 +108,7 @@ export function createTaskTools(opts: { agentId: string; config?: TasksConfig })
     execute: async (input) => {
       const db = openTasksDb(dbPath);
       const task = updateTask(db, input['taskId'] as string, {
-        status: input['status'] as TaskPriority | undefined,
+        status: input['status'] as TaskStatus | undefined,
         priority: input['priority'] as TaskPriority | undefined,
         assigneeAgentId: input['assigneeAgentId'] as string | undefined,
       });
