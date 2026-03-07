@@ -22,7 +22,7 @@ git fetch origin
 git reset --hard "origin/$BRANCH"
 
 echo "==> Installing dependencies..."
-pnpm install --frozen-lockfile
+pnpm install --no-frozen-lockfile
 
 if [ "$SKIP_BUILD" = false ]; then
   echo "==> Building TypeScript..."
@@ -30,7 +30,7 @@ if [ "$SKIP_BUILD" = false ]; then
 
   echo "==> Building dashboard..."
   cd dashboard
-  pnpm install --frozen-lockfile
+  pnpm install --no-frozen-lockfile
   pnpm build
   cd "$REPO_DIR"
 fi
