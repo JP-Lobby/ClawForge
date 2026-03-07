@@ -32,7 +32,7 @@ export default function TaskDetailPage() {
   const { lastEvent } = useWebSocket()
 
   useEffect(() => {
-    if (lastEvent?.type === 'task:updated' && lastEvent.data?.id === id) {
+    if (lastEvent?.type === 'task:updated' && (lastEvent.data as { id?: string })?.id === id) {
       refresh()
       refreshActivity()
     }

@@ -24,7 +24,7 @@ export default function ResearchPage() {
   const { data: files, loading, error, refresh } = useApi<ResearchFile[]>(fetchResearchFiles, [])
   const [selected, setSelected] = useState<string | null>(null)
   const [search, setSearch] = useState('')
-  const { data: fileContent, loading: fileLoading } = useApi<{ content: string }>(
+  const { data: fileContent, loading: fileLoading } = useApi<{ content: string } | null>(
     () => selected ? fetchResearchFile(selected) : Promise.resolve(null),
     [selected]
   )
