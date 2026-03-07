@@ -1,0 +1,9 @@
+# ClawForge Stateless Channel Registry
+# Maps Discord channel IDs to their config files.
+# Config files live in ~/.openclaw/stateless-channels/channels/
+
+channels:
+  # Uncomment and fill in your Discord channel ID:
+  # "YOUR_DISCORD_CHANNEL_ID_HERE":
+  #   config: "my-channel.yaml"
+  #   enabled: true

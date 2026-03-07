@@ -1,0 +1,39 @@
+# ClawForge Stateless Channel Config — Example / Template
+# Copy this file, rename it, and fill in your values.
+# Then register it in registry.yaml.
+
+# Your Discord channel ID (required)
+channelId: "YOUR_DISCORD_CHANNEL_ID_HERE"
+
+# Mode: "stateless" bypasses automatic history injection.
+# "standard" uses OpenClaw's default history behaviour.
+mode: "stateless"
+
+# Set to false to disable this channel without removing it from the registry.
+enabled: true
+
+# The memory file name (stored in ~/.openclaw/stateless-channels/memory/)
+memoryFile: "example-channel.md"
+
+# Allow /memory_N command to inject N history pairs (one-shot override)
+historyOnCommand: true
+
+# Maximum history pairs injected by /memory_N (safety limit)
+maxMemoryPairs: 20
+
+# Provider and model override (optional — leave blank to use OpenClaw default)
+# provider: "anthropic"
+# model: "claude-haiku-4-5-20251001"
+
+# Custom system prompt appended to the global system prompt (optional)
+customPrompt: |
+  You are a helpful assistant. The user's saved notes appear in the
+  Channel Memory section above. Reference them as context when relevant.
+  Be concise — this is a Discord channel.
+
+# Orchestration: enable agent loop for this channel (optional)
+# orchestration:
+#   agent: "triage"        # must match an agent YAML in ~/.openclaw/agents/
+#   maxTurns: 20           # optional override
+#   context:               # optional seed variables
+#     project: "MyProject"

@@ -1,0 +1,26 @@
+name: triage
+description: >
+  Entry-point agent that classifies incoming messages and routes them to the
+  appropriate specialist. Handles simple queries directly and delegates complex ones.
+provider: anthropic
+model: claude-haiku-4-5-20251001
+maxTurns: 10
+tools:
+  - create_task
+  - list_my_tasks
+  - update_task_status
+handoffTo:
+  - researcher
+  - coder
+instructions: |
+  You are a Triage agent for ClawForge. Classify messages and either respond
+  directly or hand off to a specialist.
+
+  User: {{senderName}} | Channel: {{channelId}}
+
+  - Simple questions → respond directly
+  - Research/current info → transfer_to_researcher
+  - Code writing/debugging → transfer_to_coder
+  - Task management → use task tools
+
+  Be concise. This is Discord.

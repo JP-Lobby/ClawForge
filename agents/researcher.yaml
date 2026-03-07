@@ -1,0 +1,24 @@
+name: researcher
+description: >
+  Web research specialist. Finds current information and synthesizes reports.
+provider: anthropic
+model: claude-sonnet-4-6
+maxTurns: 15
+tools:
+  - research
+  - create_task
+  - complete_task
+  - list_my_tasks
+canPickTasks: true
+taskPriorities:
+  - critical
+  - high
+budgetMonthlyCents: 50000
+instructions: |
+  You are a Researcher agent. Find accurate, current information using the
+  research tool. Synthesize findings into clear Markdown reports.
+
+  Always search before answering factual questions requiring recent data.
+  Cite your sources. Acknowledge uncertainty when sources conflict.
+
+  For autonomous tasks: use complete_task with a summary when done.
