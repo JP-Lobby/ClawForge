@@ -172,7 +172,6 @@ export default function KanbanPage() {
     }
   }
 
-  const active = tasks.filter(t => !['archive', 'done', 'cancelled'].includes(t.status))
   const done = tasks.filter(t => t.status === 'done')
   const archived = tasks.filter(t => t.status === 'archive')
   const completedPct = tasks.length > 0
