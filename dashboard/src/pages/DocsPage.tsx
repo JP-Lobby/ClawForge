@@ -33,17 +33,17 @@ function SimpleMarkdown({ content }: { content: string }) {
       const id = `code-${i}`
       elements.push(
         <div key={id} className="relative my-3 group">
-          <div className="flex items-center justify-between bg-gray-800 rounded-t px-3 py-1.5">
-            <span className="text-xs text-gray-500">{lang || 'code'}</span>
+          <div className="flex items-center justify-between bg-[#252018] rounded-t px-3 py-1.5">
+            <span className="text-xs text-[#5c5040]">{lang || 'code'}</span>
             <button
               onClick={() => copyCode(code, id)}
-              className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-300 transition-colors"
+              className="flex items-center gap-1 text-xs text-[#5c5040] hover:text-[#9c8f80] transition-colors"
             >
               {copied === id ? <Check size={11} /> : <Copy size={11} />}
               {copied === id ? 'Copied!' : 'Copy'}
             </button>
           </div>
-          <pre className="bg-gray-900 border border-gray-800 rounded-b px-4 py-3 text-xs text-gray-300 overflow-x-auto">
+          <pre className="bg-[#141210] border border-[#2c2520] rounded-b px-4 py-3 text-xs text-[#9c8f80] overflow-x-auto">
             <code>{code}</code>
           </pre>
         </div>
@@ -53,25 +53,25 @@ function SimpleMarkdown({ content }: { content: string }) {
     }
 
     if (line.startsWith('# ')) {
-      elements.push(<h1 key={i} className="text-xl font-bold text-gray-100 mt-6 mb-3">{line.slice(2)}</h1>)
+      elements.push(<h1 key={i} className="text-xl font-display font-bold text-[#f0ebe4] mt-6 mb-3">{line.slice(2)}</h1>)
     } else if (line.startsWith('## ')) {
-      elements.push(<h2 key={i} className="text-lg font-semibold text-gray-100 mt-5 mb-2">{line.slice(3)}</h2>)
+      elements.push(<h2 key={i} className="text-lg font-display font-semibold text-[#f0ebe4] mt-5 mb-2">{line.slice(3)}</h2>)
     } else if (line.startsWith('### ')) {
-      elements.push(<h3 key={i} className="text-base font-semibold text-gray-200 mt-4 mb-2">{line.slice(4)}</h3>)
+      elements.push(<h3 key={i} className="text-base font-display font-semibold text-[#f0ebe4] mt-4 mb-2">{line.slice(4)}</h3>)
     } else if (line.startsWith('- ') || line.startsWith('* ')) {
-      elements.push(<li key={i} className="text-sm text-gray-300 ml-4 list-disc">{line.slice(2)}</li>)
+      elements.push(<li key={i} className="text-sm text-[#9c8f80] ml-4 list-disc">{line.slice(2)}</li>)
     } else if (/^\d+\.\s/.test(line)) {
-      elements.push(<li key={i} className="text-sm text-gray-300 ml-4 list-decimal">{line.replace(/^\d+\.\s/, '')}</li>)
+      elements.push(<li key={i} className="text-sm text-[#9c8f80] ml-4 list-decimal">{line.replace(/^\d+\.\s/, '')}</li>)
     } else if (line.startsWith('> ')) {
-      elements.push(<blockquote key={i} className="border-l-2 border-indigo-700 pl-3 text-sm text-gray-400 italic my-1">{line.slice(2)}</blockquote>)
+      elements.push(<blockquote key={i} className="border-l-2 border-amber-700 pl-3 text-sm text-[#9c8f80] italic my-1">{line.slice(2)}</blockquote>)
     } else if (line === '') {
       elements.push(<br key={i} />)
     } else {
       const formatted = line
-        .replace(/`([^`]+)`/g, '<code class="bg-gray-800 text-indigo-300 px-1 rounded text-xs">$1</code>')
-        .replace(/\*\*([^*]+)\*\*/g, '<strong class="text-gray-100">$1</strong>')
-        .replace(/\*([^*]+)\*/g, '<em class="text-gray-300">$1</em>')
-      elements.push(<p key={i} className="text-sm text-gray-300 my-0.5" dangerouslySetInnerHTML={{ __html: formatted }} />)
+        .replace(/`([^`]+)`/g, '<code class="bg-[#252018] text-amber-300 px-1 rounded text-xs">$1</code>')
+        .replace(/\*\*([^*]+)\*\*/g, '<strong class="text-[#f0ebe4]">$1</strong>')
+        .replace(/\*([^*]+)\*/g, '<em class="text-[#9c8f80]">$1</em>')
+      elements.push(<p key={i} className="text-sm text-[#9c8f80] my-0.5" dangerouslySetInnerHTML={{ __html: formatted }} />)
     }
     i++
   }
@@ -90,41 +90,41 @@ export default function DocsPage() {
   return (
     <div className="flex h-full">
       {/* File list */}
-      <div className="w-56 border-r border-gray-800 flex flex-col bg-gray-900">
-        <div className="p-3 border-b border-gray-800">
-          <h1 className="text-sm font-bold text-gray-100">Docs</h1>
-          <p className="text-xs text-gray-600 mt-0.5">{(files ?? []).length} files</p>
+      <div className="w-56 border-r border-[#2c2520] flex flex-col bg-[#141210]">
+        <div className="p-3 border-b border-[#2c2520]">
+          <h1 className="text-sm font-display font-bold text-[#f0ebe4]">Docs</h1>
+          <p className="text-xs text-[#3a3028] mt-0.5">{(files ?? []).length} files</p>
         </div>
         <div className="flex-1 overflow-y-auto py-1">
-          {loading && <p className="text-xs text-gray-600 px-3 py-2">Loading…</p>}
+          {loading && <p className="text-xs text-[#3a3028] px-3 py-2">Loading…</p>}
           {(files ?? []).map(file => (
             <button
               key={file.filename}
               onClick={() => setSelectedFile(file.filename)}
-              className={`w-full text-left px-3 py-2 transition-colors ${selectedFile === file.filename ? 'bg-indigo-900/40 border-r-2 border-indigo-500' : 'hover:bg-gray-800'}`}
+              className={`w-full text-left px-3 py-2 transition-colors ${selectedFile === file.filename ? 'bg-amber-950/40 border-r-2 border-amber-500' : 'hover:bg-[#252018]'}`}
             >
               <div className="flex items-center gap-2">
-                <FileText size={12} className="text-gray-500 shrink-0" />
-                <span className="text-xs text-gray-300 truncate">{file.filename}</span>
+                <FileText size={12} className="text-[#5c5040] shrink-0" />
+                <span className="text-xs text-[#9c8f80] truncate">{file.filename}</span>
               </div>
-              <p className="text-[10px] text-gray-600 mt-0.5 ml-4">{(file.sizeBytes / 1024).toFixed(1)} KB</p>
+              <p className="text-[10px] text-[#3a3028] mt-0.5 ml-4">{(file.sizeBytes / 1024).toFixed(1)} KB</p>
             </button>
           ))}
           {!loading && (files ?? []).length === 0 && (
-            <p className="text-xs text-gray-600 px-3 py-4 text-center">No research files found.</p>
+            <p className="text-xs text-[#3a3028] px-3 py-4 text-center">No research files found.</p>
           )}
         </div>
       </div>
 
       {/* Viewer */}
-      <div className="flex-1 overflow-y-auto p-6">
+      <div className="flex-1 overflow-y-auto bg-[#0a0907] p-6">
         {!selectedFile && (
-          <div className="flex items-center justify-center h-full text-gray-700">
-            <p className="text-sm">Select a file to view</p>
+          <div className="flex items-center justify-center h-full text-[#3a3028]">
+            <p className="text-xs font-mono">Select a file to view</p>
           </div>
         )}
         {selectedFile && fileLoading && (
-          <p className="text-gray-500 text-sm">Loading…</p>
+          <p className="text-[#5c5040] text-xs font-mono">Loading…</p>
         )}
         {selectedFile && !fileLoading && fileData && (
           <div className="max-w-3xl">
