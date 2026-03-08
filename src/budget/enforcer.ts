@@ -26,7 +26,7 @@ export function createBudgetEnforcer(
   opts: { taskId?: string; dbPath?: string }
 ): BudgetEnforcer {
   const dbPath = opts.dbPath ?? DEFAULT_BUDGET_DB_PATH;
-  const limitCents = agent.budgetMonthlyCents ?? 0;
+  const limitCents = 0; // budget per-agent limit removed from agent config
 
   return {
     async assertUnderBudget(): Promise<void> {
