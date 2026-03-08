@@ -136,14 +136,21 @@ Save these IDs — you will use them in Step 7.
 
 ---
 
-## 5. Step 3 — Configure openclaw.json
+## 5. Step 3 — Configure the Config Files
 
-Edit `~/.openclaw/openclaw.json` on the Pi. Below is the **complete merged config** that keeps your existing OpenClaw settings and adds the three ClawForge sections.
+> **Important:** ClawForge uses **two separate config files** that live side by side in `~/.openclaw/`.
+> OpenClaw validates its own file strictly and will reject unrecognised keys — so ClawForge keeps its config completely separate.
+>
+> | File | Owner | Purpose |
+> |------|-------|---------|
+> | `~/.openclaw/openclaw.json` | OpenClaw | Bot token, channels, gateway, models, plugins |
+> | `~/.openclaw/clawforge.json` | ClawForge | Dashboard, orchestration, tasks/scheduler |
+
+### 5.1 Edit `~/.openclaw/openclaw.json` (OpenClaw keys only)
 
 Replace the placeholder values:
 - `YOUR_MINIMAX_API_KEY` — from [minimax.io](https://www.minimax.io/) API keys
 - `YOUR_DISCORD_BOT_TOKEN` — from Step 2.1 above
-- `YOUR_DASHBOARD_TOKEN` — make up any long random string (e.g. `openssl rand -hex 32`)
 - `YOUR_GATEWAY_TOKEN` — keep your existing token if you have one
 
 ```json
@@ -151,12 +158,6 @@ Replace the placeholder values:
   "meta": {
     "lastTouchedVersion": "2026.3.2",
     "lastTouchedAt": "2026-03-07T21:34:01.385Z"
-  },
-  "wizard": {
-    "lastRunAt": "2026-03-07T21:34:01.235Z",
-    "lastRunVersion": "2026.3.2",
-    "lastRunCommand": "onboard",
-    "lastRunMode": "local"
   },
   "auth": {
     "profiles": {
@@ -179,12 +180,7 @@ Replace the placeholder values:
             "name": "MiniMax M2.5",
             "reasoning": true,
             "input": ["text"],
-            "cost": {
-              "input": 0.3,
-              "output": 1.2,
-              "cacheRead": 0.03,
-              "cacheWrite": 0.12
-            },
+            "cost": { "input": 0.3, "output": 1.2, "cacheRead": 0.03, "cacheWrite": 0.12 },
             "contextWindow": 200000,
             "maxTokens": 8192
           }
@@ -194,29 +190,13 @@ Replace the placeholder values:
   },
   "agents": {
     "defaults": {
-      "model": {
-        "primary": "minimax/MiniMax-M2.5"
-      },
-      "models": {
-        "minimax/MiniMax-M2.5": {
-          "alias": "Minimax"
-        }
-      },
+      "model": { "primary": "minimax/MiniMax-M2.5" },
       "workspace": "/home/pi-2/.openclaw/workspace"
     }
   },
-  "tools": {
-    "profile": "messaging"
-  },
-  "commands": {
-    "native": "auto",
-    "nativeSkills": "auto",
-    "restart": true,
-    "ownerDisplay": "raw"
-  },
-  "session": {
-    "dmScope": "per-channel-peer"
-  },
+  "tools": { "profile": "messaging" },
+  "commands": { "native": "auto", "nativeSkills": "auto", "restart": true },
+  "session": { "dmScope": "per-channel-peer" },
   "hooks": {
     "internal": {
       "enabled": true,
@@ -240,37 +220,22 @@ Replace the placeholder values:
     "port": 18789,
     "mode": "local",
     "bind": "loopback",
-    "auth": {
-      "mode": "token",
-      "token": "YOUR_GATEWAY_TOKEN"
-    },
-    "tailscale": {
-      "mode": "off",
-      "resetOnExit": false
-    },
-    "nodes": {
-      "denyCommands": [
-        "camera.snap",
-        "camera.clip",
-        "screen.record",
-        "contacts.add",
-        "calendar.add",
-        "reminders.add",
-        "sms.send"
-      ]
-    }
+    "auth": { "mode": "token", "token": "YOUR_GATEWAY_TOKEN" },
+    "tailscale": { "mode": "off", "resetOnExit": false }
   },
-  "skills": {
-    "install": {
-      "nodeManager": "npm"
-    }
-  },
-  "plugins": {
-    "entries": {
-      "discord": { "enabled": true }
-    }
-  },
+  "skills": { "install": { "nodeManager": "npm" } },
+  "plugins": { "entries": { "discord": { "enabled": true } } }
+}
+```
 
+### 5.2 Create `~/.openclaw/clawforge.json` (ClawForge keys)
+
+Replace the placeholder values:
+- `YOUR_MINIMAX_API_KEY` — same key as above
+- `YOUR_DASHBOARD_TOKEN` — make up any long random string (e.g. `openssl rand -hex 32`)
+
+```json
+{
   "orchestration": {
     "enabled": true,
     "agentsDir": "/home/pi-2/.openclaw/agents",
@@ -282,9 +247,9 @@ Replace the placeholder values:
       }
     }
   },
-
   "tasks": {
     "enabled": true,
+    "dbPath": "/home/pi-2/.openclaw/data/tasks.db",
     "autonomous": {
       "enabled": true,
       "heartbeatIntervalMs": 60000,
@@ -292,7 +257,6 @@ Replace the placeholder values:
       "maxRequestDepth": 3
     }
   },
-
   "dashboard": {
     "enabled": true,
     "port": 3001,
@@ -304,13 +268,32 @@ Replace the placeholder values:
 
 > **Note on the `anthropic` provider name:** ClawForge's built-in provider is called `anthropic` and uses the Anthropic messages API format. Since MiniMax is fully Anthropic-API-compatible, we configure it under the `anthropic` key with MiniMax's `baseUrl`. In your agent YAML files you will write `provider: anthropic` and it will route through MiniMax.
 
-> **Want real Anthropic?** Replace `baseUrl` with nothing (remove the field) and set `apiKey` to your `sk-ant-...` key from [console.anthropic.com](https://console.anthropic.com).
+> **Want real Anthropic?** Remove the `baseUrl` field and set `apiKey` to your `sk-ant-...` key from [console.anthropic.com](https://console.anthropic.com).
 
-After editing, save and restart:
+After editing, restart both services:
 ```bash
-sudo systemctl restart clawforge   # if ClawForge is already running
-# or restart OpenClaw if you haven't deployed ClawForge yet
+npx openclaw gateway restart   # picks up openclaw.json changes
+sudo systemctl restart clawforge  # picks up clawforge.json changes
 ```
+
+### 5.3 Migrating an existing install
+
+If you previously ran ClawForge before this change, your `openclaw.json` may contain `orchestration`, `tasks`, and `dashboard` keys that OpenClaw now rejects. Run this one-liner to split them out automatically:
+
+```bash
+node -e "
+const fs = require('fs'), os = require('os'), path = require('path');
+const dir = path.join(os.homedir(), '.openclaw');
+const src = JSON.parse(fs.readFileSync(path.join(dir, 'openclaw.json'), 'utf8'));
+const cf = { dashboard: src.dashboard, orchestration: src.orchestration, tasks: src.tasks };
+fs.writeFileSync(path.join(dir, 'clawforge.json'), JSON.stringify(cf, null, 2));
+['dashboard','orchestration','tasks'].forEach(k => delete src[k]);
+fs.writeFileSync(path.join(dir, 'openclaw.json'), JSON.stringify(src, null, 2));
+console.log('Done — clawforge.json written, openclaw.json cleaned.');
+"
+```
+
+Then restart both services as shown above.
 
 ---
 
@@ -340,17 +323,17 @@ git checkout clawforge
 
 ### 6.3 Run the onboarding wizard
 
-The onboard script sets your dashboard auth token, creates all required directories, and adds ClawForge sections to `~/.openclaw/openclaw.json` automatically:
+The onboard script sets your dashboard auth token, creates all required directories, and writes ClawForge's config to `~/.openclaw/clawforge.json` — it **never touches** `openclaw.json`:
 
 ```bash
 bash scripts/onboard.sh
 ```
 
 It will:
-- Check/create `~/.openclaw/openclaw.json`
+- Verify `~/.openclaw/openclaw.json` exists (OpenClaw's file — read-only for ClawForge)
 - Prompt you for a dashboard auth token (or auto-generate one)
 - Create all required directories (`agents/`, `stateless-channels/`, `data/`)
-- Merge ClawForge config sections into your existing `openclaw.json`
+- Write/merge ClawForge sections into `~/.openclaw/clawforge.json`
 - Print your Tailscale IP and dashboard URL when done
 
 ---
@@ -644,7 +627,7 @@ Example: `http://100.65.59.79:3001`
 ### Set the auth token (first visit only)
 
 1. Navigate to **Settings** (bottom of the left sidebar)
-2. Enter your `authToken` from `openclaw.json`
+2. Enter your `authToken` from `~/.openclaw/clawforge.json`
 3. Click **Save** — stored in your browser, never re-asked
 
 ### Dashboard pages
@@ -749,12 +732,12 @@ Open the **Tasks** page — you'll see the task move through `todo → in_progre
 
 ### Adjust heartbeat interval
 
-In `openclaw.json`:
+In `~/.openclaw/clawforge.json` (or via the **Scheduler** page in the dashboard):
 ```json
 "tasks": {
   "autonomous": {
-    "heartbeatIntervalMs": 30000,   ← check every 30 seconds
-    "maxConcurrentTasks": 2         ← run up to 2 tasks at once
+    "heartbeatIntervalMs": 30000,
+    "maxConcurrentTasks": 2
   }
 }
 ```
@@ -889,6 +872,25 @@ pnpm rebuild better-sqlite3
 sudo systemctl restart clawforge
 ```
 
+### `openclaw` reports "Unrecognized keys: orchestration, tasks, dashboard"
+
+ClawForge keys must live in `clawforge.json`, not `openclaw.json`. Run the migration one-liner to split them out:
+
+```bash
+node -e "
+const fs = require('fs'), os = require('os'), path = require('path');
+const dir = path.join(os.homedir(), '.openclaw');
+const src = JSON.parse(fs.readFileSync(path.join(dir, 'openclaw.json'), 'utf8'));
+const cf = { dashboard: src.dashboard, orchestration: src.orchestration, tasks: src.tasks };
+fs.writeFileSync(path.join(dir, 'clawforge.json'), JSON.stringify(cf, null, 2));
+['dashboard','orchestration','tasks'].forEach(k => delete src[k]);
+fs.writeFileSync(path.join(dir, 'openclaw.json'), JSON.stringify(src, null, 2));
+console.log('Done.');
+"
+npx openclaw gateway restart
+sudo systemctl restart clawforge
+```
+
 ### Permission errors on git pull
 
 ```bash
@@ -920,7 +922,7 @@ sqlite3 ~/.openclaw/clawforge-tasks.db \
 - Check `canPickTasks: true` is set in the agent YAML
 - Check `taskPriorities` includes the task's priority level
 - Check the agent isn't paused (Budget page in dashboard)
-- Check `tasks.autonomous.enabled: true` in `openclaw.json`
+- Check `tasks.autonomous.enabled: true` in `~/.openclaw/clawforge.json`
 - Promote the task: `/task promote <id>` (tasks start in `backlog`, agents only pick from `todo`)
 
 ### Check if a channel is registered
@@ -941,7 +943,8 @@ Look for your channel ID in the response. If it's missing, check `registry.yaml`
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   Config files:
-    ~/.openclaw/openclaw.json          main config
+    ~/.openclaw/openclaw.json          OpenClaw config (bot token, channels, gateway)
+    ~/.openclaw/clawforge.json         ClawForge config (dashboard, orchestration, tasks)
     ~/.openclaw/agents/*.yaml          agent definitions
     ~/.openclaw/stateless-channels/
       registry.yaml                    channel → config map
