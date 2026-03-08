@@ -14,43 +14,47 @@ while [[ "$#" -gt 0 ]]; do
   shift
 done
 
-# The user who invoked sudo (or current user if not using sudo)
-SERVICE_USER="${SUDO_USER:-$(whoami)}"
+if [ "$(id -u)" = "0" ]; then
+  echo "==> ❌ Do not run with sudo. Run as your normal user:"
+  echo "       bash scripts/deploy-pi.sh"
+  echo "       (sudo is used internally only for systemd steps)"
+  exit 1
+fi
 
-echo "==> ClawForge Deploy: branch=$BRANCH skip-build=$SKIP_BUILD user=$SERVICE_USER"
-
-# Run a command as SERVICE_USER with their full login environment (.profile + .bashrc)
-run_as_user() {
-  sudo -u "$SERVICE_USER" bash -l -c "cd '$REPO_DIR' && $*"
-}
+echo "==> ClawForge Deploy: branch=$BRANCH skip-build=$SKIP_BUILD user=$(whoami)"
+cd "$REPO_DIR"
 
 echo "==> Fetching latest..."
-run_as_user "git fetch origin && git reset --hard 'origin/$BRANCH'"
+git fetch origin
+git reset --hard "origin/$BRANCH"
 
 echo "==> Installing dependencies..."
-run_as_user "pnpm install --no-frozen-lockfile"
+pnpm install --no-frozen-lockfile
 
 echo "==> Rebuilding native addons..."
-run_as_user "pnpm rebuild better-sqlite3"
+pnpm rebuild better-sqlite3
 
 if [ "$SKIP_BUILD" = false ]; then
   echo "==> Building TypeScript..."
-  run_as_user "pnpm build"
+  pnpm build
 
   echo "==> Building dashboard..."
-  run_as_user "cd dashboard && pnpm install --no-frozen-lockfile && pnpm build"
+  cd dashboard
+  pnpm install --no-frozen-lockfile
+  pnpm build
+  cd "$REPO_DIR"
 fi
 
 echo "==> Installing systemd service..."
-NODE_BIN="$(sudo -u "$SERVICE_USER" bash -l -c 'which node')"
-tee /etc/systemd/system/clawforge.service > /dev/null << EOF
+NODE_BIN="$(which node)"
+sudo tee /etc/systemd/system/clawforge.service > /dev/null << EOF
 [Unit]
 Description=ClawForge Multi-Agent Orchestration
 After=network.target
 
 [Service]
 Type=simple
-User=$SERVICE_USER
+User=$(whoami)
 WorkingDirectory=$REPO_DIR
 ExecStart=$NODE_BIN --max-old-space-size=512 --expose-gc $REPO_DIR/dist/gateway/server.impl.js
 Restart=on-failure
@@ -62,14 +66,14 @@ Environment=NODE_ENV=production
 WantedBy=multi-user.target
 EOF
 
-systemctl daemon-reload
-systemctl enable clawforge
-systemctl restart clawforge
+sudo systemctl daemon-reload
+sudo systemctl enable clawforge
+sudo systemctl restart clawforge
 
 echo "==> Waiting for service to start..."
 sleep 3
 
-if systemctl is-active --quiet clawforge; then
+if sudo systemctl is-active --quiet clawforge; then
   PI_IP=$(hostname -I | awk '{print $1}')
   echo "==> ✅ ClawForge is running!"
   echo "==> Dashboard: http://${PI_IP}:3001"

@@ -213,7 +213,7 @@ It will:
 ### 6.3 Deploy
 
 ```bash
-sudo bash scripts/deploy-pi.sh
+bash scripts/deploy-pi.sh
 ```
 
 This installs dependencies, compiles TypeScript, builds the dashboard, and installs + starts the systemd service. When it finishes:
@@ -241,10 +241,10 @@ journalctl -u clawforge -f          # live logs
 sudo systemctl restart clawforge    # restart after config changes
 
 # Redeploy after a code update:
-cd ~/ClawForge && git pull && sudo bash scripts/deploy-pi.sh
+cd ~/ClawForge && git pull && bash scripts/deploy-pi.sh
 
 # Skip rebuild if only YAML/config files changed:
-sudo bash scripts/deploy-pi.sh --skip-build
+bash scripts/deploy-pi.sh --skip-build
 ```
 
 ---
@@ -724,7 +724,7 @@ curl http://localhost:3001/api/channels
     http://<pi-tailscale-ip>:3001
 
   Redeploy after code update:
-    cd ~/ClawForge && git pull && sudo bash scripts/deploy-pi.sh
+    cd ~/ClawForge && git pull && bash scripts/deploy-pi.sh
 
   Discord memory:
     /remember <text>    save to memory
