@@ -54,6 +54,16 @@ export function openTasksDb(dbPath: string = DEFAULT_DB_PATH): Database.Database
     CREATE INDEX IF NOT EXISTS idx_task_comments_task ON task_comments(task_id);
     CREATE INDEX IF NOT EXISTS idx_activity_task ON task_activity_log(task_id);
     CREATE INDEX IF NOT EXISTS idx_activity_created ON task_activity_log(created_at DESC);
+
+    CREATE TABLE IF NOT EXISTS notes (
+      id TEXT PRIMARY KEY,
+      content TEXT NOT NULL,
+      pinned INTEGER NOT NULL DEFAULT 0,
+      created_at INTEGER NOT NULL,
+      updated_at INTEGER NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_notes_order ON notes(pinned DESC, created_at DESC);
   `);
 
   return db;

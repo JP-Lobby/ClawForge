@@ -9,7 +9,6 @@ export interface ClawAgent {
   handoffTo?: string[];
   canPickTasks?: boolean;
   taskPriorities?: string[];
-  budgetMonthlyCents?: number;
 }
 
 export interface AgentContext {

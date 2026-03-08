@@ -1,16 +1,19 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import Sidebar from './components/Sidebar'
 import DashboardPage from './pages/DashboardPage'
-import TasksPage from './pages/TasksPage'
-import TaskDetailPage from './pages/TaskDetailPage'
+import KanbanPage from './pages/KanbanPage'
+import OrchestratorPage from './pages/OrchestratorPage'
+import NotesPage from './pages/NotesPage'
 import AgentsPage from './pages/AgentsPage'
-import AgentDetailPage from './pages/AgentDetailPage'
-import MemoryPage from './pages/MemoryPage'
-import ChannelsPage from './pages/ChannelsPage'
-import ResearchPage from './pages/ResearchPage'
+import AgentEditPage from './pages/AgentEditPage'
 import ActivityPage from './pages/ActivityPage'
-import BudgetPage from './pages/BudgetPage'
+import DocsPage from './pages/DocsPage'
+import ReportsPage from './pages/ReportsPage'
+import ChannelsPage from './pages/ChannelsPage'
+import MemoryPage from './pages/MemoryPage'
+import SchedulerPage from './pages/SchedulerPage'
 import SettingsPage from './pages/SettingsPage'
+import TaskDetailPage from './pages/TaskDetailPage'
 
 function AppLayout() {
   return (
@@ -20,15 +23,19 @@ function AppLayout() {
         <Routes>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/tasks" element={<TasksPage />} />
-          <Route path="/tasks/:id" element={<TaskDetailPage />} />
+          <Route path="/orchestrator" element={<OrchestratorPage />} />
+          <Route path="/kanban" element={<KanbanPage />} />
+          <Route path="/kanban/:id" element={<TaskDetailPage />} />
+          <Route path="/notes" element={<NotesPage />} />
           <Route path="/agents" element={<AgentsPage />} />
-          <Route path="/agents/:name" element={<AgentDetailPage />} />
-          <Route path="/memory" element={<MemoryPage />} />
-          <Route path="/channels" element={<ChannelsPage />} />
-          <Route path="/research" element={<ResearchPage />} />
+          <Route path="/agents/new" element={<AgentEditPage />} />
+          <Route path="/agents/:name/edit" element={<AgentEditPage />} />
           <Route path="/activity" element={<ActivityPage />} />
-          <Route path="/budget" element={<BudgetPage />} />
+          <Route path="/docs" element={<DocsPage />} />
+          <Route path="/reports" element={<ReportsPage />} />
+          <Route path="/channels" element={<ChannelsPage />} />
+          <Route path="/memory" element={<MemoryPage />} />
+          <Route path="/scheduler" element={<SchedulerPage />} />
           <Route path="/settings" element={<SettingsPage />} />
         </Routes>
       </main>

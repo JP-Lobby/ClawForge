@@ -316,9 +316,9 @@ sudo systemctl restart clawforge   # if ClawForge is already running
 
 ## 6. Step 4 — Set Up the Raspberry Pi
 
-### 6.1 Install Tailscale (optional but recommended)
+### 6.1 Install Tailscale — REQUIRED for secure remote access
 
-Tailscale gives your Pi a stable IP across networks, so you can access the dashboard from anywhere:
+> **Security note:** The ClawForge dashboard binds to `0.0.0.0:3001`. **Never expose this port to the internet.** Access it ONLY via Tailscale — this is the recommended and intended access method.
 
 ```bash
 curl -fsSL https://tailscale.com/install.sh | sh
@@ -326,6 +326,8 @@ sudo tailscale up
 # Follow the auth URL it prints — log in with your Tailscale account
 tailscale ip -4   # prints your Pi's Tailscale IP, e.g. 100.65.59.79
 ```
+
+Install Tailscale on your laptop/desktop too so you can reach the Pi from anywhere.
 
 ### 6.2 Clone ClawForge
 
@@ -336,13 +338,20 @@ cd ClawForge
 git checkout clawforge
 ```
 
-### 6.3 Create config directories
+### 6.3 Run the onboarding wizard
+
+The onboard script sets your dashboard auth token, creates all required directories, and adds ClawForge sections to `~/.openclaw/openclaw.json` automatically:
 
 ```bash
-mkdir -p ~/.openclaw/agents
-mkdir -p ~/.openclaw/stateless-channels/channels
-mkdir -p ~/.openclaw/stateless-channels/memory
+bash scripts/onboard.sh
 ```
+
+It will:
+- Check/create `~/.openclaw/openclaw.json`
+- Prompt you for a dashboard auth token (or auto-generate one)
+- Create all required directories (`agents/`, `stateless-channels/`, `data/`)
+- Merge ClawForge config sections into your existing `openclaw.json`
+- Print your Tailscale IP and dashboard URL when done
 
 ---
 
@@ -380,11 +389,23 @@ cd ~/ClawForge && git pull && sudo bash scripts/deploy-pi.sh
 sudo bash scripts/deploy-pi.sh --skip-build
 ```
 
+### Register Discord slash commands
+
+So that `/research`, `/remember`, `/forget`, `/status`, `/task`, and `/memory_n` appear in Discord's `/` autocomplete:
+
+```bash
+pnpm tsx scripts/register-discord-commands.ts
+```
+
+The script reads your bot token from `~/.openclaw/openclaw.json`, prompts for your Application ID and Guild (Server) ID, then registers all commands via the Discord API. Commands appear in Discord within a few minutes.
+
+Get your Application ID from [Discord Developer Portal](https://discord.com/developers/applications) → select your app → General Information.
+
 ---
 
 ## 8. Step 6 — Create Agent Files
 
-Agents are YAML files in `~/.openclaw/agents/`. Each file defines one AI agent with its model, instructions, tools, and budget.
+Agents are YAML files in `~/.openclaw/agents/`. You can create/edit/delete agents directly from the **Agents** tab in the dashboard, or by editing YAML files manually. Each file defines one AI agent with its model, instructions, and tools.
 
 ### Minimal agent (no tools)
 
@@ -457,7 +478,6 @@ canPickTasks: true
 taskPriorities:
   - critical
   - high
-budgetMonthlyCents: 5000
 instructions: |
   You are a Researcher. User: {{senderName}}
 
