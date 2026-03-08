@@ -5,7 +5,7 @@ import type { ClawForgeConfig } from '../dashboard-api/types.js';
 import { startMemoryGuard, stopMemoryGuard } from '../utils/memory-guard.js';
 import { ensureTaskSchedulerRunning, stopTaskScheduler } from '../tasks/scheduler.js';
 
-const CONFIG_PATH = path.join(os.homedir(), '.openclaw', 'openclaw.json');
+const CONFIG_PATH = path.join(os.homedir(), '.openclaw', 'clawforge.json');
 
 const EXAMPLE_CONFIG = `
 {
@@ -40,7 +40,7 @@ const EXAMPLE_CONFIG = `
 function loadConfig(): ClawForgeConfig {
   if (!existsSync(CONFIG_PATH)) {
     console.warn(`[ClawForge] No config found at ${CONFIG_PATH}`);
-    console.warn('[ClawForge] Create it with this structure:\n' + EXAMPLE_CONFIG);
+    console.warn('[ClawForge] Run: bash scripts/onboard.sh  (or create it manually):\n' + EXAMPLE_CONFIG);
     return { dashboard: { enabled: true, port: 3001, host: '0.0.0.0' } };
   }
 

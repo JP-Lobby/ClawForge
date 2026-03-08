@@ -4,7 +4,7 @@ import path from 'node:path';
 import os from 'node:os';
 import type { RouteContext, SchedulerConfig } from '../types.js';
 
-const CONFIG_PATH = path.join(os.homedir(), '.openclaw', 'openclaw.json');
+const CONFIG_PATH = path.join(os.homedir(), '.openclaw', 'clawforge.json');
 
 function readFullConfig(): Record<string, unknown> {
   try {
