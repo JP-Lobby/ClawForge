@@ -158,6 +158,15 @@ export function resetStaleTasks(db: Database.Database, thresholdMs = 30 * 60 * 1
   return result.changes;
 }
 
+export function deleteTask(db: Database.Database, id: string): boolean {
+  const task = getTask(db, id);
+  if (!task) return false;
+  db.prepare('DELETE FROM task_comments WHERE task_id = ?').run(task.id);
+  db.prepare('DELETE FROM task_activity WHERE task_id = ?').run(task.id);
+  const result = db.prepare('DELETE FROM tasks WHERE id = ?').run(task.id);
+  return result.changes > 0;
+}
+
 export function promoteBacklogTasks(db: Database.Database): number {
   const now = Date.now();
   const result = db.prepare(`

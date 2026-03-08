@@ -10,19 +10,20 @@
 
 1. [What Is This?](#1-what-is-this)
 2. [Prerequisites](#2-prerequisites)
-3. [Step 1 — Install OpenClaw](#3-step-1--install-openclaw)
-4. [Step 2 — Create a Discord Bot](#4-step-2--create-a-discord-bot)
-5. [Step 3 — Configure openclaw.json](#5-step-3--configure-opnclawjson)
-6. [Step 4 — Set Up the Raspberry Pi](#6-step-4--set-up-the-raspberry-pi)
-7. [Step 5 — Deploy ClawForge](#7-step-5--deploy-clawforge)
-8. [Step 6 — Create Agent Files](#8-step-6--create-agent-files)
-9. [Step 7 — Register Discord Channels](#9-step-7--register-discord-channels)
-10. [Step 8 — Access the Dashboard](#10-step-8--access-the-dashboard)
-11. [Step 9 — Discord Commands Reference](#11-step-9--discord-commands-reference)
-12. [Step 10 — Autonomous Tasks](#12-step-10--autonomous-tasks)
-13. [Step 11 — Agent Orchestration & Handoffs](#13-step-11--agent-orchestration--handoffs)
-14. [Step 12 — Budget Limits](#14-step-12--budget-limits)
-15. [Troubleshooting](#15-troubleshooting)
+3. [Step 1 — Flash Pi OS & Enable SSH](#3-step-1--flash-pi-os--enable-ssh)
+4. [Step 2 — Install Tailscale on the Pi](#4-step-2--install-tailscale-on-the-pi)
+5. [Step 3 — Install Node.js & OpenClaw](#5-step-3--install-nodejs--openclaw)
+6. [Step 4 — Create a Discord Bot](#6-step-4--create-a-discord-bot)
+7. [Step 5 — Configure the Config Files](#7-step-5--configure-the-config-files)
+8. [Step 6 — Clone & Onboard ClawForge](#8-step-6--clone--onboard-clawforge)
+9. [Step 7 — Deploy ClawForge](#9-step-7--deploy-clawforge)
+10. [Step 8 — Create Agents](#10-step-8--create-agents)
+11. [Step 9 — Register Discord Channels](#11-step-9--register-discord-channels)
+12. [Step 10 — Access the Dashboard](#12-step-10--access-the-dashboard)
+13. [Step 11 — Discord Commands Reference](#13-step-11--discord-commands-reference)
+14. [Step 12 — Autonomous Tasks](#14-step-12--autonomous-tasks)
+15. [Step 13 — Agent Orchestration & Handoffs](#15-step-13--agent-orchestration--handoffs)
+16. [Troubleshooting](#16-troubleshooting)
 
 ---
 
@@ -55,60 +56,115 @@ Discord message
 | Requirement | Version | Notes |
 |-------------|---------|-------|
 | Raspberry Pi 4 | 4 GB RAM | 2 GB works but is tight |
-| Raspberry Pi OS | Bookworm (64-bit) | `aarch64` required |
+| Raspberry Pi OS Lite | **64-bit (Bookworm)** | `aarch64` required — use Pi Imager |
 | Node.js | 20 LTS | Do **not** use Node 22 on Pi |
 | pnpm | 10+ | Installed via npm |
 | Git | any | Pre-installed on Pi OS |
 | Discord account | — | To create a bot |
 | MiniMax or Anthropic API key | — | For the LLM |
+| Tailscale account | free | [tailscale.com](https://tailscale.com) — required for secure remote access |
 
 ---
 
-## 3. Step 1 — Install OpenClaw
+## 3. Step 1 — Flash Pi OS & Enable SSH
 
-### 3.1 On the Raspberry Pi
+> **Do this before anything else.** Tailscale goes on the Pi in Step 2 so you can do the entire rest of the setup remotely over SSH — no keyboard/monitor needed after that.
+
+### 3.1 Flash with Pi Imager
+
+1. Download **Raspberry Pi Imager** from [raspberrypi.com/software](https://www.raspberrypi.com/software/)
+2. Choose OS: **Raspberry Pi OS Lite (64-bit)** — no desktop needed
+3. Click the ⚙️ **gear icon** (Advanced Options) before writing:
+   - ✅ **Enable SSH** → *Use password authentication*
+   - ✅ **Set username and password** → e.g. `pi-2` / your password
+   - ✅ **Configure WiFi** (if not using ethernet)
+   - ✅ **Set locale / timezone**
+4. Write to SD card, insert into Pi, power on
+
+### 3.2 Find the Pi's local IP
 
 ```bash
-# SSH into your Pi
-ssh pi@<your-pi-ip>
+# From your laptop — scan your local network
+ping raspberrypi.local   # works if mDNS is available
+
+# Or check your router's DHCP table for the Pi's IP
+# Or use: nmap -sn 192.168.1.0/24 | grep -A1 Raspberry
+```
+
+### 3.3 First SSH connection (local network only — temporary)
+
+```bash
+ssh pi-2@<pi-local-ip>
+# Accept the fingerprint, enter your password
+```
+
+---
+
+## 4. Step 2 — Install Tailscale on the Pi
+
+> **This is the most important step.** After Tailscale is installed, you can close this local SSH session and do everything else from anywhere via your Tailscale IP. You will never need to be on the same network as the Pi again.
+
+```bash
+# On the Pi (via local SSH):
+curl -fsSL https://tailscale.com/install.sh | sh
+sudo tailscale up
+# It will print an auth URL — open it in your browser and log in
+```
+
+After authenticating:
+```bash
+tailscale ip -4   # prints something like 100.65.59.79 — save this
+```
+
+Install Tailscale on your **laptop/desktop** too:
+- [tailscale.com/download](https://tailscale.com/download)
+- Log in with the same account
+
+Now reconnect via Tailscale (you can close the local SSH session):
+```bash
+ssh pi-2@100.65.59.79   # your Tailscale IP
+```
+
+From this point on, all commands run over Tailscale SSH. The Pi can be anywhere.
+
+---
+
+## 5. Step 3 — Install Node.js & OpenClaw
+
+```bash
+# Install build tools (needed for better-sqlite3)
+sudo apt-get update
+sudo apt-get install -y build-essential python3 git lsof
 
 # Install Node.js 20
 curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
 sudo apt-get install -y nodejs
 
 # Verify
-node --version   # should print v20.x.x
+node --version   # must print v20.x.x — do NOT use v22+
 
 # Install pnpm
 npm install -g pnpm
 
-# Install native build tools (needed for better-sqlite3)
-sudo apt-get install -y build-essential python3
+# Install OpenClaw globally
+npm install -g openclaw
 
-# Clone OpenClaw
-git clone https://github.com/JP-Lobby/openclaw.git ~/openclaw
-cd ~/openclaw
-
-# Install dependencies and start once to generate default config
-npm install
-npm start
-# Press Ctrl+C after it starts — this creates ~/.openclaw/
+# Run once to generate ~/.openclaw/ and openclaw.json
+npx openclaw --version
+# Or: openclaw channels list  (will create config directory)
 ```
 
-### 3.2 Config directory
-
-OpenClaw creates `~/.openclaw/` on first run. Check it exists:
-
+OpenClaw creates `~/.openclaw/openclaw.json` on first run:
 ```bash
 ls ~/.openclaw/
-# You should see: openclaw.json  workspace/
+# openclaw.json  workspace/
 ```
 
 ---
 
-## 4. Step 2 — Create a Discord Bot
+## 6. Step 4 — Create a Discord Bot
 
-### 4.1 Create the application
+### 6.1 Create the application
 
 1. Go to [discord.com/developers/applications](https://discord.com/developers/applications)
 2. Click **New Application** → give it a name (e.g. `ClawForge`)
@@ -118,25 +174,25 @@ ls ~/.openclaw/
    - ✅ Server Members Intent (optional but recommended)
 5. Copy the **Bot Token** — you will need it for `openclaw.json`
 
-### 4.2 Invite the bot to your server
+### 6.2 Invite the bot to your server
 
 1. Go to **OAuth2 → URL Generator**
 2. Scopes: ✅ `bot`
 3. Bot Permissions: ✅ `Send Messages`, ✅ `Read Message History`, ✅ `Read Messages/View Channels`
 4. Copy the generated URL → open it in browser → select your server → **Authorize**
 
-### 4.3 Get your Discord channel IDs
+### 6.3 Get your Discord channel IDs
 
 You need channel IDs to register channels in ClawForge.
 
 1. In Discord: **User Settings → Advanced → Enable Developer Mode**
 2. Right-click any channel → **Copy Channel ID**
 
-Save these IDs — you will use them in Step 7.
+Save these IDs — you will use them in Step 9.
 
 ---
 
-## 5. Step 3 — Configure the Config Files
+## 7. Step 5 — Configure the Config Files
 
 > **Important:** ClawForge uses **two separate config files** that live side by side in `~/.openclaw/`.
 > OpenClaw validates its own file strictly and will reject unrecognised keys — so ClawForge keeps its config completely separate.
@@ -146,7 +202,7 @@ Save these IDs — you will use them in Step 7.
 > | `~/.openclaw/openclaw.json` | OpenClaw | Bot token, channels, gateway, models, plugins |
 > | `~/.openclaw/clawforge.json` | ClawForge | Dashboard, orchestration, tasks/scheduler |
 
-### 5.1 Edit `~/.openclaw/openclaw.json` (OpenClaw keys only)
+### 7.1 Edit `~/.openclaw/openclaw.json` (OpenClaw keys only)
 
 Replace the placeholder values:
 - `YOUR_MINIMAX_API_KEY` — from [minimax.io](https://www.minimax.io/) API keys
@@ -228,7 +284,7 @@ Replace the placeholder values:
 }
 ```
 
-### 5.2 Create `~/.openclaw/clawforge.json` (ClawForge keys)
+### 7.2 Create `~/.openclaw/clawforge.json` (ClawForge keys)
 
 Replace the placeholder values:
 - `YOUR_MINIMAX_API_KEY` — same key as above
@@ -276,7 +332,7 @@ npx openclaw gateway restart   # picks up openclaw.json changes
 sudo systemctl restart clawforge  # picks up clawforge.json changes
 ```
 
-### 5.3 Migrating an existing install
+### 7.3 Migrating an existing install
 
 If you previously ran ClawForge before this change, your `openclaw.json` may contain `orchestration`, `tasks`, and `dashboard` keys that OpenClaw now rejects. Run this one-liner to split them out automatically:
 
@@ -297,22 +353,7 @@ Then restart both services as shown above.
 
 ---
 
-## 6. Step 4 — Set Up the Raspberry Pi
-
-### 6.1 Install Tailscale — REQUIRED for secure remote access
-
-> **Security note:** The ClawForge dashboard binds to `0.0.0.0:3001`. **Never expose this port to the internet.** Access it ONLY via Tailscale — this is the recommended and intended access method.
-
-```bash
-curl -fsSL https://tailscale.com/install.sh | sh
-sudo tailscale up
-# Follow the auth URL it prints — log in with your Tailscale account
-tailscale ip -4   # prints your Pi's Tailscale IP, e.g. 100.65.59.79
-```
-
-Install Tailscale on your laptop/desktop too so you can reach the Pi from anywhere.
-
-### 6.2 Clone ClawForge
+## 8. Step 6 — Clone & Onboard ClawForge
 
 ```bash
 cd ~
@@ -321,9 +362,7 @@ cd ClawForge
 git checkout clawforge
 ```
 
-### 6.3 Run the onboarding wizard
-
-The onboard script sets your dashboard auth token, creates all required directories, and writes ClawForge's config to `~/.openclaw/clawforge.json` — it **never touches** `openclaw.json`:
+Run the onboarding wizard — it sets your dashboard auth token, creates all required directories, and writes `~/.openclaw/clawforge.json`. It **never touches** `openclaw.json`:
 
 ```bash
 bash scripts/onboard.sh
@@ -333,12 +372,14 @@ It will:
 - Verify `~/.openclaw/openclaw.json` exists (OpenClaw's file — read-only for ClawForge)
 - Prompt you for a dashboard auth token (or auto-generate one)
 - Create all required directories (`agents/`, `stateless-channels/`, `data/`)
-- Write/merge ClawForge sections into `~/.openclaw/clawforge.json`
+- Write `~/.openclaw/clawforge.json` with your dashboard/orchestration/tasks config
 - Print your Tailscale IP and dashboard URL when done
+
+> **Security note:** The dashboard binds to `0.0.0.0:3001`. **Never expose port 3001 to the internet.** Access it ONLY via your Tailscale IP.
 
 ---
 
-## 7. Step 5 — Deploy ClawForge
+## 9. Step 7 — Deploy ClawForge
 
 Run the deploy script. It handles everything: install deps, build TypeScript, build dashboard, install and start the systemd service.
 
@@ -386,9 +427,11 @@ Get your Application ID from [Discord Developer Portal](https://discord.com/deve
 
 ---
 
-## 8. Step 6 — Create Agent Files
+## 10. Step 8 — Create Agents
 
-Agents are YAML files in `~/.openclaw/agents/`. You can create/edit/delete agents directly from the **Agents** tab in the dashboard, or by editing YAML files manually. Each file defines one AI agent with its model, instructions, and tools.
+**The easiest way is via the dashboard** — go to **Agents → New Agent**, fill in the form, and hit Save. The YAML file is written to `~/.openclaw/agents/` automatically with no SSH required.
+
+Alternatively, create YAML files manually:
 
 ### Minimal agent (no tools)
 
@@ -528,9 +571,9 @@ instructions: |
 
 ---
 
-## 9. Step 7 — Register Discord Channels
+## 11. Step 9 — Register Discord Channels
 
-### 9.1 Create the registry
+### 11.1 Create the registry
 
 ```bash
 nano ~/.openclaw/stateless-channels/registry.yaml
@@ -549,7 +592,7 @@ channels:
     enabled: true
 ```
 
-### 9.2 Create channel config files
+### 11.2 Create channel config files
 
 **Simple channel — memory only, no agents:**
 
@@ -615,7 +658,7 @@ sudo systemctl restart clawforge
 
 ---
 
-## 10. Step 8 — Access the Dashboard
+## 12. Step 10 — Access the Dashboard
 
 Open in your browser:
 ```
@@ -632,23 +675,26 @@ Example: `http://100.65.59.79:3001`
 
 ### Dashboard pages
 
-| Page | What it shows |
-|------|---------------|
-| **Dashboard** | Overview: task counts, agent status, recent activity, budget gauges |
-| **Tasks** | Full task list with status filters and inline create |
-| **Agents** | All registered agents, reload button per agent |
-| **Memory** | Per-channel memory editor — view and edit stored notes |
-| **Channels** | Channel config viewer (read-only — edit YAML files to change) |
-| **Research** | Browse and read saved research reports |
-| **Activity** | Global event log — every LLM call, handoff, task change |
-| **Budget** | Per-agent monthly spend gauges |
-| **Settings** | API URL and auth token configuration |
+| Page | Sidebar group | What it does |
+|------|---------------|-------------|
+| **Dashboard** | CONTROL | Overview: agent status cards, pinned notes, task stat chips, recent activity |
+| **Orchestrator** | CONTROL | Send a message to any agent, watch the response stream live, browse run history |
+| **Kanban** | WORK | Drag-and-drop task board (To Do / In Progress / Done), archive tab, inline add |
+| **Notes** | WORK | Pinned markdown notes — split-pane editor, auto-save, pin/unpin |
+| **Agents** | INTELLIGENCE | List all agents, create/edit/delete via form (writes YAML automatically) |
+| **Activity** | INTELLIGENCE | Global event log — every LLM call, handoff, tool use, task change |
+| **Docs** | DATA | Browse repo Markdown files with rendered preview and copy buttons |
+| **Reports** | DATA | Weekly SVG bar charts — tasks by status, tasks by agent, key metrics |
+| **Channels** | CONFIGURE | Channel config viewer (read the YAML; edit files to change) |
+| **Memory** | CONFIGURE | Per-channel memory editor — view and edit stored notes |
+| **Scheduler** | CONFIGURE | Heartbeat interval, max concurrent tasks, max depth, enable toggle |
+| **Settings** | CONFIGURE | Auth token, raw `clawforge.json` editor |
 
 The dashboard updates in real time via WebSocket — no need to refresh.
 
 ---
 
-## 11. Step 9 — Discord Commands Reference
+## 13. Step 11 — Discord Commands Reference
 
 All commands work in any registered channel.
 
@@ -694,7 +740,7 @@ Memory is stored as Markdown in `~/.openclaw/stateless-channels/memory/<channel>
 
 ---
 
-## 12. Step 10 — Autonomous Tasks
+## 14. Step 12 — Autonomous Tasks
 
 Agents with `canPickTasks: true` automatically pick up tasks from the queue without any Discord message being required.
 
@@ -744,7 +790,7 @@ In `~/.openclaw/clawforge.json` (or via the **Scheduler** page in the dashboard)
 
 ---
 
-## 13. Step 11 — Agent Orchestration & Handoffs
+## 15. Step 13 — Agent Orchestration & Handoffs
 
 When a channel has an `orchestration` section, every incoming Discord message is routed through a full agent loop instead of a single LLM call.
 
@@ -793,7 +839,7 @@ Auto-injected variables (always available):
 
 ---
 
-## 14. Step 12 — Budget Limits
+## 16. Budget & Spend Tracking
 
 Prevent runaway costs by setting per-agent monthly limits.
 
@@ -830,7 +876,7 @@ Budget is tracked in `~/.openclaw/clawforge-budget.db` (SQLite, resets at start 
 
 ---
 
-## 15. Troubleshooting
+## 17. Troubleshooting
 
 ### Bot not responding in a channel
 

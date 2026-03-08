@@ -25,7 +25,7 @@ export function createSchedulerRouter(ctx: RouteContext): Router {
     const auto = ctx.config.tasks?.autonomous ?? {};
     return {
       enabled: auto.enabled ?? true,
-      heartbeatIntervalMs: auto.heartbeatIntervalMs ?? 30000,
+      heartbeatIntervalMs: auto.heartbeatIntervalMs ?? 60000,
       maxConcurrentTasks: auto.maxConcurrentTasks ?? 3,
       maxRequestDepth: auto.maxRequestDepth ?? 5,
     };
