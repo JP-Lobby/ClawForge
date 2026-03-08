@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import type { RouteContext } from '../types.js';
 import { openTasksDb, DEFAULT_DB_PATH } from '../../tasks/store.js';
-import { createTask, getTask, listTasks, updateTask, addComment, getTaskStats } from '../../tasks/service.js';
+import { createTask, getTask, listTasks, updateTask, deleteTask, addComment, getTaskStats } from '../../tasks/service.js';
 import { getActivity } from '../../tasks/activity-log.js';
 import type { TaskPriority, TaskStatus } from '../../tasks/types.js';
 
@@ -48,6 +48,14 @@ export function createTasksRouter(ctx: RouteContext): Router {
     } catch (err) {
       res.status(404).json({ error: err instanceof Error ? err.message : 'Not found' });
     }
+  });
+
+  router.delete('/:id', (req, res) => {
+    const db = openTasksDb(dbPath);
+    const deleted = deleteTask(db, req.params['id']!);
+    if (!deleted) { res.status(404).json({ error: 'Task not found' }); return; }
+    ctx.broadcast('task:deleted', { taskId: req.params['id'] });
+    res.status(204).send();
   });
 
   router.post('/:id/comments', (req, res) => {

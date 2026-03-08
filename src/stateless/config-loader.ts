@@ -14,7 +14,6 @@ interface CacheEntry<T> {
   mtime: number;
 }
 
-const registryCache: CacheEntry<StatelessRegistry> | null = null;
 let _registryCache: CacheEntry<StatelessRegistry> | null = null;
 const channelCache = new Map<string, CacheEntry<StatelessChannelConfig>>();
 
@@ -104,4 +103,4 @@ export function getChannelsDir(): string {
   return CHANNELS_DIR;
 }
 
-export { registryCache };
+export { _registryCache as registryCache };
