@@ -14,43 +14,36 @@ while [[ "$#" -gt 0 ]]; do
   shift
 done
 
-echo "==> ClawForge Deploy: branch=$BRANCH skip-build=$SKIP_BUILD"
-cd "$REPO_DIR"
-
-# When run via sudo, pnpm lives in the invoking user's npm globals — not root's PATH
+# The user who invoked sudo (or current user if not using sudo)
 SERVICE_USER="${SUDO_USER:-$(whoami)}"
-if ! command -v pnpm &>/dev/null; then
-  USER_NPM_BIN="$(su - "$SERVICE_USER" -c 'npm config get prefix' 2>/dev/null)/bin"
-  export PATH="$USER_NPM_BIN:$PATH"
-fi
-if ! command -v pnpm &>/dev/null; then
-  echo "==> ❌ pnpm not found. Run: npm install -g pnpm"
-  exit 1
-fi
+
+echo "==> ClawForge Deploy: branch=$BRANCH skip-build=$SKIP_BUILD user=$SERVICE_USER"
+
+# Run a command as SERVICE_USER with their full environment (PATH, npm, pnpm, node)
+run_as_user() {
+  su - "$SERVICE_USER" -c "cd '$REPO_DIR' && $*"
+}
 
 echo "==> Fetching latest..."
-su - "$SERVICE_USER" -c "cd '$REPO_DIR' && git fetch origin && git reset --hard 'origin/$BRANCH'"
+run_as_user "git fetch origin && git reset --hard 'origin/$BRANCH'"
 
 echo "==> Installing dependencies..."
-pnpm install --no-frozen-lockfile
+run_as_user "pnpm install --no-frozen-lockfile"
 
 echo "==> Rebuilding native addons..."
-pnpm rebuild better-sqlite3
+run_as_user "pnpm rebuild better-sqlite3"
 
 if [ "$SKIP_BUILD" = false ]; then
   echo "==> Building TypeScript..."
-  pnpm build
+  run_as_user "pnpm build"
 
   echo "==> Building dashboard..."
-  cd dashboard
-  pnpm install --no-frozen-lockfile
-  pnpm build
-  cd "$REPO_DIR"
+  run_as_user "cd dashboard && pnpm install --no-frozen-lockfile && pnpm build"
 fi
 
 echo "==> Installing systemd service..."
-NODE_BIN="$(which node)"
-sudo tee /etc/systemd/system/clawforge.service > /dev/null << EOF
+NODE_BIN="$(su - "$SERVICE_USER" -c 'which node')"
+tee /etc/systemd/system/clawforge.service > /dev/null << EOF
 [Unit]
 Description=ClawForge Multi-Agent Orchestration
 After=network.target
@@ -69,14 +62,14 @@ Environment=NODE_ENV=production
 WantedBy=multi-user.target
 EOF
 
-sudo systemctl daemon-reload
-sudo systemctl enable clawforge
-sudo systemctl restart clawforge
+systemctl daemon-reload
+systemctl enable clawforge
+systemctl restart clawforge
 
 echo "==> Waiting for service to start..."
 sleep 3
 
-if sudo systemctl is-active --quiet clawforge; then
+if systemctl is-active --quiet clawforge; then
   PI_IP=$(hostname -I | awk '{print $1}')
   echo "==> ✅ ClawForge is running!"
   echo "==> Dashboard: http://${PI_IP}:3001"
