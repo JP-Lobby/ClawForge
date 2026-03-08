@@ -4,8 +4,8 @@ import { ProviderStatus } from '../api/types'
 import { useApi } from '../hooks/useApi'
 import { CheckCircle, XCircle, RefreshCw, Save } from 'lucide-react'
 
-const API_URL_KEY = 'cf_api_url'
-const TOKEN_KEY = 'cf_token'
+const API_URL_KEY = 'clawforge:apiUrl'
+const TOKEN_KEY = 'clawforge:authToken'
 
 export default function SettingsPage() {
   const [apiUrl, setApiUrl] = useState(() => localStorage.getItem(API_URL_KEY) ?? '')

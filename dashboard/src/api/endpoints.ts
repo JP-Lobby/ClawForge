@@ -186,7 +186,7 @@ export async function runOrchestrator(
   onChunk?: (text: string) => void,
 ): Promise<string> {
   if (onChunk) {
-    const token = localStorage.getItem('cf_token') ?? '';
+    const token = localStorage.getItem('clawforge:authToken') ?? '';
     const resp = await fetch('/api/orchestrate', {
       method: 'POST',
       headers: {
