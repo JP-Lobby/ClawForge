@@ -29,8 +29,7 @@ if ! command -v pnpm &>/dev/null; then
 fi
 
 echo "==> Fetching latest..."
-git fetch origin
-git reset --hard "origin/$BRANCH"
+su - "$SERVICE_USER" -c "cd '$REPO_DIR' && git fetch origin && git reset --hard 'origin/$BRANCH'"
 
 echo "==> Installing dependencies..."
 pnpm install --no-frozen-lockfile
