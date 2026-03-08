@@ -42,7 +42,7 @@ function MemoryEditor({ channelId }: { channelId: string }) {
     }
   }
 
-  if (loading && !data) return <div className="text-gray-500 text-sm p-3">Loading…</div>
+  if (loading && !data) return <div className="text-[#5c5040] text-xs font-mono p-3">Loading…</div>
   if (error) return <div className="text-red-400 text-sm p-3">{error}</div>
 
   const sizeKb = ((data?.sizeBytes ?? 0) / 1024).toFixed(1)
@@ -50,16 +50,16 @@ function MemoryEditor({ channelId }: { channelId: string }) {
   return (
     <div className="mt-2 ml-4">
       <div className="flex items-center gap-3 mb-2">
-        <span className="text-xs text-gray-500">{sizeKb} KB</span>
-        <button onClick={startEdit} className="text-xs text-indigo-400 hover:text-indigo-300">Edit</button>
-        <button onClick={handleClear} disabled={clearing} className="text-xs text-red-400 hover:text-red-300 disabled:opacity-50">
+        <span className="text-xs text-[#5c5040] font-mono">{sizeKb} KB</span>
+        <button onClick={startEdit} className="text-xs text-amber-400 hover:text-amber-300 transition-colors">Edit</button>
+        <button onClick={handleClear} disabled={clearing} className="text-xs text-red-400 hover:text-red-300 disabled:opacity-50 transition-colors">
           {clearing ? 'Clearing…' : 'Clear'}
         </button>
       </div>
       {editing ? (
         <div>
           <textarea
-            className="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm text-gray-100 font-mono focus:outline-none focus:border-indigo-500 resize-y"
+            className="w-full bg-[#252018] border border-[#2c2520] rounded-md px-3 py-2 text-sm text-[#f0ebe4] font-mono focus:outline-none focus:border-amber-500 resize-y transition-colors"
             rows={10}
             value={content}
             onChange={e => setContent(e.target.value)}
@@ -68,22 +68,22 @@ function MemoryEditor({ channelId }: { channelId: string }) {
             <button
               onClick={handleSave}
               disabled={saving}
-              className="flex items-center gap-1 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white px-3 py-1.5 rounded text-xs font-medium transition-colors"
+              className="flex items-center gap-1 bg-amber-600 hover:bg-amber-500 disabled:opacity-50 text-stone-950 font-display font-semibold px-3 py-1.5 rounded text-xs transition-colors"
             >
               <Save size={12} />
               {saving ? 'Saving…' : 'Save'}
             </button>
             <button
               onClick={() => setEditing(false)}
-              className="bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-1.5 rounded text-xs transition-colors"
+              className="bg-[#252018] hover:bg-[#1c1816] text-[#9c8f80] px-3 py-1.5 rounded text-xs transition-colors font-mono"
             >
               Cancel
             </button>
           </div>
         </div>
       ) : (
-        <pre className="text-xs text-gray-400 bg-gray-800 rounded p-3 whitespace-pre-wrap font-mono max-h-48 overflow-y-auto">
-          {data?.content || <span className="text-gray-600 italic">No memory stored</span>}
+        <pre className="text-xs text-[#9c8f80] bg-[#252018] rounded p-3 whitespace-pre-wrap font-mono max-h-48 overflow-y-auto">
+          {data?.content || <span className="text-[#3a3028] italic">No memory stored</span>}
         </pre>
       )}
     </div>
@@ -104,28 +104,28 @@ export default function MemoryPage() {
   return (
     <div className="p-6 max-w-4xl">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-100">Memory</h1>
-        <p className="text-gray-400 text-sm mt-1">Persistent memory per stateless channel</p>
+        <h1 className="text-2xl font-display font-bold text-[#f0ebe4] tracking-tight">Memory</h1>
+        <p className="text-[#9c8f80] text-xs font-mono mt-1">Persistent memory per stateless channel</p>
       </div>
 
       <div className="space-y-2">
         {(channels ?? []).map((ch: any) => (
-          <div key={ch.id} className="bg-gray-900 border border-gray-800 rounded-lg p-4">
+          <div key={ch.id} className="bg-[#1c1816] border border-[#2c2520] rounded p-4">
             <button
               onClick={() => toggle(ch.id)}
               className="w-full flex items-center justify-between text-left"
             >
               <div>
-                <span className="text-sm font-medium text-gray-200">{ch.name || ch.id}</span>
-                <span className="ml-2 text-xs text-gray-500 font-mono">{ch.id}</span>
+                <span className="text-sm font-display font-medium text-[#f0ebe4]">{ch.name || ch.id}</span>
+                <span className="ml-2 text-xs text-[#5c5040] font-mono">{ch.id}</span>
               </div>
-              {expanded[ch.id] ? <ChevronDown size={16} className="text-gray-400" /> : <ChevronRight size={16} className="text-gray-400" />}
+              {expanded[ch.id] ? <ChevronDown size={16} className="text-[#9c8f80]" /> : <ChevronRight size={16} className="text-[#9c8f80]" />}
             </button>
             {expanded[ch.id] && <MemoryEditor channelId={ch.id} />}
           </div>
         ))}
         {(channels ?? []).length === 0 && (
-          <div className="text-center py-12 text-gray-500 text-sm">
+          <div className="text-center py-12 text-[#5c5040] text-xs font-mono">
             No channels configured yet.
           </div>
         )}

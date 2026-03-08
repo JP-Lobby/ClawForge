@@ -28,59 +28,98 @@ export default function AgentsPage() {
 
   return (
     <div className="p-6 max-w-5xl">
+      {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-100">Agents</h1>
-          <p className="text-gray-400 text-sm mt-1">{(agents ?? []).length} agent{(agents ?? []).length !== 1 ? 's' : ''} configured</p>
+          <h1 className="text-2xl font-display font-bold text-[#f0ebe4] tracking-tight">Agents</h1>
+          <p className="text-[10px] text-[#3a3028] font-mono mt-1 uppercase tracking-wider">
+            {(agents ?? []).length} agent{(agents ?? []).length !== 1 ? 's' : ''} configured
+          </p>
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={refresh} className="flex items-center gap-2 bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-2 rounded-lg text-sm transition-colors">
-            <RefreshCw size={14} /> Refresh
+          <button
+            onClick={refresh}
+            className="flex items-center gap-2 bg-[#1c1816] hover:bg-[#252018] border border-[#2c2520] hover:border-[#3a3028] text-[#9c8f80] px-3 py-2 rounded text-xs transition-all font-mono"
+          >
+            <RefreshCw size={13} /> Refresh
           </button>
-          <Link to="/agents/new" className="flex items-center gap-2 bg-indigo-700 hover:bg-indigo-600 text-white px-3 py-2 rounded-lg text-sm transition-colors">
-            <Plus size={14} /> New Agent
+          <Link
+            to="/agents/new"
+            className="flex items-center gap-2 bg-amber-600 hover:bg-amber-500 text-stone-950 font-display font-bold px-3 py-2 rounded text-xs transition-colors"
+          >
+            <Plus size={13} /> New Agent
           </Link>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {/* Agent grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         {(agents ?? []).map((agent: Agent) => (
-          <div key={agent.name} className="bg-gray-900 border border-gray-800 rounded-lg p-4 hover:border-gray-700 transition-colors group">
+          <div
+            key={agent.name}
+            className="border border-[#2c2520] rounded bg-[#1c1816] p-4 hover:border-[#3a3028] hover:bg-[#252018] transition-all group"
+          >
             <div className="flex items-start justify-between gap-3">
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-gray-100 truncate">{agent.name}</p>
-                <p className="text-xs text-gray-500 mt-0.5 truncate">{agent.description || 'No description'}</p>
+                <p className="text-sm font-display font-semibold text-[#f0ebe4] truncate">{agent.name}</p>
+                <p className="text-[10px] text-[#5c5040] mt-0.5 truncate font-mono">
+                  {agent.description || 'No description'}
+                </p>
               </div>
-              <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-                <button onClick={() => handleReload(agent.name)} disabled={reloading === agent.name} title="Reload config" className="text-gray-500 hover:text-gray-300 p-1.5 rounded transition-colors">
-                  <RefreshCw size={13} className={reloading === agent.name ? 'animate-spin' : ''} />
+              <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+                <button
+                  onClick={() => handleReload(agent.name)}
+                  disabled={reloading === agent.name}
+                  title="Reload config"
+                  className="text-[#3a3028] hover:text-[#9c8f80] p-1.5 rounded transition-colors"
+                >
+                  <RefreshCw size={12} className={reloading === agent.name ? 'animate-spin' : ''} />
                 </button>
-                <button onClick={() => navigate(`/agents/${agent.name}/edit`)} title="Edit" className="text-gray-500 hover:text-indigo-400 p-1.5 rounded transition-colors">
-                  <Edit2 size={13} />
+                <button
+                  onClick={() => navigate(`/agents/${agent.name}/edit`)}
+                  title="Edit"
+                  className="text-[#3a3028] hover:text-amber-400 p-1.5 rounded transition-colors"
+                >
+                  <Edit2 size={12} />
                 </button>
-                <button onClick={() => handleDelete(agent.name)} disabled={deleting === agent.name} title="Delete" className="text-gray-500 hover:text-red-400 p-1.5 rounded transition-colors">
-                  <Trash2 size={13} />
+                <button
+                  onClick={() => handleDelete(agent.name)}
+                  disabled={deleting === agent.name}
+                  title="Delete"
+                  className="text-[#3a3028] hover:text-red-400 p-1.5 rounded transition-colors"
+                >
+                  <Trash2 size={12} />
                 </button>
               </div>
             </div>
             <div className="flex items-center gap-2 mt-3 flex-wrap">
-              <span className="text-[10px] bg-indigo-900/50 text-indigo-300 px-1.5 py-0.5 rounded">{agent.provider ?? 'anthropic'}</span>
-              <span className="text-[10px] text-gray-600">{agent.model ?? 'default'}</span>
+              <span className="text-[9px] bg-amber-950/60 text-amber-400 px-1.5 py-0.5 rounded-sm font-mono uppercase tracking-wide">
+                {agent.provider ?? 'anthropic'}
+              </span>
+              <span className="text-[9px] text-[#3a3028] font-mono">{agent.model ?? 'default'}</span>
               {(agent.tools ?? []).length > 0 && (
-                <span className="text-[10px] text-gray-600">{agent.tools!.length} tool{agent.tools!.length !== 1 ? 's' : ''}</span>
+                <span className="text-[9px] text-[#3a3028] font-mono">
+                  {agent.tools!.length} tool{agent.tools!.length !== 1 ? 's' : ''}
+                </span>
               )}
               {(agent.handoffTo ?? []).length > 0 && (
-                <span className="text-[10px] text-gray-600">→ {agent.handoffTo!.join(', ')}</span>
+                <span className="text-[9px] text-[#3a3028] font-mono">→ {agent.handoffTo!.join(', ')}</span>
               )}
               {agent.canPickTasks && (
-                <span className="text-[10px] bg-green-900/50 text-green-400 px-1.5 py-0.5 rounded">autonomous</span>
+                <span className="text-[9px] bg-emerald-950/60 text-emerald-400 px-1.5 py-0.5 rounded-sm font-mono">
+                  autonomous
+                </span>
               )}
             </div>
           </div>
         ))}
         {(agents ?? []).length === 0 && (
-          <div className="col-span-2 text-center py-12 text-gray-500 text-sm">
-            No agents found. <Link to="/agents/new" className="text-indigo-400 hover:text-indigo-300">Create one</Link>.
+          <div className="col-span-2 text-center py-12 text-[#3a3028] text-xs font-mono">
+            No agents found.{' '}
+            <Link to="/agents/new" className="text-amber-500 hover:text-amber-400 transition-colors">
+              Create one
+            </Link>
+            .
           </div>
         )}
       </div>

@@ -10,15 +10,27 @@ import { useNavigate } from 'react-router-dom'
 
 const AGENT_COLORS = ['#6366f1', '#06B6D4', '#F59E0B', '#10B981', '#EC4899']
 
-function StatCard({ icon, label, value, sub, color = 'text-indigo-400' }: { icon: ReactNode; label: string; value: string | number; sub?: string; color?: string }) {
+function StatCard({
+  icon, label, value, sub, color = 'text-amber-400', delay = 0,
+}: {
+  icon: ReactNode
+  label: string
+  value: string | number
+  sub?: string
+  color?: string
+  delay?: number
+}) {
   return (
-    <div className="bg-gray-900 border border-gray-800 rounded-lg p-4">
-      <div className="flex items-center gap-3 mb-2">
+    <div
+      className="border border-[#2c2520] rounded bg-[#1c1816] p-4 animate-enter opacity-0"
+      style={{ animationFillMode: 'forwards', animationDelay: `${delay}ms` }}
+    >
+      <div className="flex items-center gap-2 mb-3">
         <span className={color}>{icon}</span>
-        <span className="text-sm text-gray-400">{label}</span>
+        <span className="text-[10px] tracking-widest uppercase font-display text-[#3a3028]">{label}</span>
       </div>
-      <div className="text-2xl font-bold text-gray-100">{value}</div>
-      {sub && <div className="text-xs text-gray-500 mt-1">{sub}</div>}
+      <div className="text-3xl font-display font-bold text-[#f0ebe4]">{value}</div>
+      {sub && <div className="text-[10px] text-[#5c5040] mt-1 font-mono">{sub}</div>}
     </div>
   )
 }
@@ -45,25 +57,55 @@ export default function DashboardPage() {
 
   return (
     <div className="p-6 max-w-7xl">
+      {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-100">Dashboard</h1>
-        <p className="text-gray-400 text-sm mt-1">Mission control overview</p>
+        <h1 className="text-2xl font-display font-bold text-[#f0ebe4] tracking-tight">Dashboard</h1>
+        <p className="text-[10px] text-[#3a3028] font-mono mt-1 tracking-wider uppercase">Mission Control</p>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <StatCard icon={<CheckSquare size={18} />} label="Total Tasks" value={stats?.total ?? 0} sub={`${stats?.inProgress ?? 0} in progress`} />
-        <StatCard icon={<CheckSquare size={18} />} label="Done" value={stats?.completed ?? 0} sub={`${stats?.todo ?? 0} pending`} color="text-green-400" />
-        <StatCard icon={<Bot size={18} />} label="Agents" value={(agents ?? []).length} sub="configured" color="text-cyan-400" />
-        <StatCard icon={<StickyNote size={18} />} label="Notes" value={(notes ?? []).length} sub={`${pinnedNotes.length} pinned`} color="text-yellow-400" />
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+        <StatCard
+          icon={<CheckSquare size={16} />}
+          label="Total Tasks"
+          value={stats?.total ?? 0}
+          sub={`${stats?.inProgress ?? 0} in progress`}
+          delay={0}
+        />
+        <StatCard
+          icon={<CheckSquare size={16} />}
+          label="Done"
+          value={stats?.completed ?? 0}
+          sub={`${stats?.todo ?? 0} pending`}
+          color="text-emerald-400"
+          delay={60}
+        />
+        <StatCard
+          icon={<Bot size={16} />}
+          label="Agents"
+          value={(agents ?? []).length}
+          sub="configured"
+          color="text-cyan-400"
+          delay={120}
+        />
+        <StatCard
+          icon={<StickyNote size={16} />}
+          label="Notes"
+          value={(notes ?? []).length}
+          sub={`${pinnedNotes.length} pinned`}
+          color="text-amber-300"
+          delay={180}
+        />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Activity */}
-        <div className="lg:col-span-2 bg-gray-900 border border-gray-800 rounded-lg p-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        {/* Activity Feed */}
+        <div className="lg:col-span-2 border border-[#2c2520] rounded bg-[#1c1816] p-4">
           <div className="flex items-center gap-2 mb-4">
-            <Activity size={16} className="text-indigo-400" />
-            <h2 className="text-sm font-semibold text-gray-300">Recent Activity</h2>
+            <Activity size={14} className="text-amber-400" />
+            <h2 className="text-[10px] font-display font-semibold tracking-widest uppercase text-[#5c5040]">
+              Recent Activity
+            </h2>
           </div>
           <ActivityFeed entries={activity?.entries ?? []} maxItems={15} />
         </div>
@@ -71,54 +113,72 @@ export default function DashboardPage() {
         {/* Right column */}
         <div className="space-y-4">
           {/* Agent status */}
-          <div className="bg-gray-900 border border-gray-800 rounded-lg p-4">
+          <div className="border border-[#2c2520] rounded bg-[#1c1816] p-4">
             <div className="flex items-center gap-2 mb-3">
-              <Bot size={15} className="text-cyan-400" />
-              <h2 className="text-sm font-semibold text-gray-300">Agent Status</h2>
+              <Bot size={13} className="text-cyan-400" />
+              <h2 className="text-[10px] font-display font-semibold tracking-widest uppercase text-[#5c5040]">
+                Agent Status
+              </h2>
             </div>
             {agentsLoading ? (
-              <p className="text-gray-600 text-xs">Loading…</p>
+              <div className="h-3 w-24 bg-[#252018] rounded animate-pulse" />
             ) : (
               <div className="space-y-2">
                 {(agents ?? []).map((agent, idx) => {
                   const color = AGENT_COLORS[idx % AGENT_COLORS.length]
                   const isActive = activeTasks[agent.name]
                   return (
-                    <div key={agent.name} className="flex items-center gap-2.5 p-2 rounded-lg" style={{ background: `${color}10`, border: `1px solid ${color}30` }}>
+                    <div
+                      key={agent.name}
+                      className="flex items-center gap-2.5 p-2 rounded"
+                      style={{ background: `${color}08`, border: `1px solid ${color}25` }}
+                    >
                       <div
-                        className={`w-2 h-2 rounded-full shrink-0 ${isActive ? 'animate-pulse' : ''}`}
-                        style={{ background: isActive ? color : '#374151' }}
+                        className={`w-2 h-2 rounded-full shrink-0 ${isActive ? 'animate-forge-pulse' : ''}`}
+                        style={{
+                          background: isActive ? color : '#2c2520',
+                          boxShadow: isActive ? `0 0 8px ${color}` : 'none',
+                        }}
                       />
                       <div className="flex-1 min-w-0">
-                        <p className="text-xs font-medium truncate" style={{ color }}>{agent.name}</p>
-                        <p className="text-[10px] text-gray-600 truncate">{agent.model ?? 'unknown model'}</p>
+                        <p className="text-xs font-mono font-medium truncate" style={{ color }}>{agent.name}</p>
+                        <p className="text-[10px] text-[#3a3028] truncate font-mono">{agent.model ?? 'unknown model'}</p>
                       </div>
                     </div>
                   )
                 })}
-                {(agents ?? []).length === 0 && <p className="text-gray-600 text-xs">No agents configured.</p>}
+                {(agents ?? []).length === 0 && (
+                  <p className="text-[#3a3028] text-xs font-mono">No agents configured.</p>
+                )}
               </div>
             )}
           </div>
 
           {/* Pinned notes */}
           {pinnedNotes.length > 0 && (
-            <div className="bg-gray-900 border border-gray-800 rounded-lg p-4">
+            <div className="border border-[#2c2520] rounded bg-[#1c1816] p-4">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
-                  <Pin size={13} className="text-yellow-400" />
-                  <h2 className="text-sm font-semibold text-gray-300">Pinned Notes</h2>
+                  <Pin size={12} className="text-amber-400" />
+                  <h2 className="text-[10px] font-display font-semibold tracking-widest uppercase text-[#5c5040]">
+                    Pinned Notes
+                  </h2>
                 </div>
-                <button onClick={() => navigate('/notes')} className="text-xs text-indigo-400 hover:text-indigo-300">View all</button>
+                <button
+                  onClick={() => navigate('/notes')}
+                  className="text-[10px] text-amber-500 hover:text-amber-400 font-mono transition-colors"
+                >
+                  View all
+                </button>
               </div>
               <div className="space-y-2">
                 {pinnedNotes.map(note => (
                   <button
                     key={note.id}
                     onClick={() => navigate('/notes')}
-                    className="w-full text-left bg-gray-800/50 rounded p-2 hover:bg-gray-800 transition-colors"
+                    className="w-full text-left border border-[#2c2520] rounded p-2.5 hover:bg-[#252018] hover:border-[#3a3028] transition-all"
                   >
-                    <p className="text-xs text-gray-300 line-clamp-2">{note.content}</p>
+                    <p className="text-xs text-[#9c8f80] font-mono line-clamp-2">{note.content}</p>
                   </button>
                 ))}
               </div>
