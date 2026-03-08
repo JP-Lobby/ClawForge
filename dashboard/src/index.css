@@ -2,9 +2,42 @@
 @tailwind components;
 @tailwind utilities;
 
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: #1e1b4b; }
-::-webkit-scrollbar-thumb { background: #4338ca; border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #6366f1; }
+:root {
+  --bg-deep: #0a0907;
+  --bg-surface: #141210;
+  --bg-card: #1c1816;
+  --border: #2c2520;
+  --text: #f0ebe4;
+  --text-muted: #9c8f80;
+  --forge: #f59e0b;
+}
 
-body { font-family: 'JetBrains Mono', ui-monospace, monospace; background: #0f0e23; color: #e2e8f0; }
+/* Warm grain texture overlay */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.06;
+}
+
+body {
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  background: var(--bg-deep);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: var(--bg-card); }
+::-webkit-scrollbar-thumb { background: #b45309; border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: var(--forge); }
+
+/* Stagger utility classes */
+.stagger-1 { animation-delay: 60ms; }
+.stagger-2 { animation-delay: 120ms; }
+.stagger-3 { animation-delay: 180ms; }
+.stagger-4 { animation-delay: 240ms; }

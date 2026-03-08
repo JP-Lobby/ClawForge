@@ -33,39 +33,61 @@ export default function SchedulerPage() {
     }
   }
 
-  if (!config) return <div className="p-6 text-gray-400 text-sm">Loading…</div>
+  const inputClass = "bg-[#141210] border border-[#2c2520] rounded-md px-3 py-2 text-sm text-[#f0ebe4] focus:outline-none focus:border-amber-500 font-mono transition-colors"
+  const labelClass = "text-xs font-display font-semibold text-[#9c8f80] uppercase tracking-wide block mb-2"
+
+  if (!config) return (
+    <div className="p-6 space-y-2">
+      <div className="h-4 w-24 bg-[#252018] rounded animate-pulse" />
+      <div className="h-3 w-40 bg-[#1c1816] rounded animate-pulse" />
+    </div>
+  )
 
   return (
     <div className="p-6 max-w-2xl">
+      {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-100">Scheduler</h1>
-        <p className="text-gray-400 text-sm mt-1">Configure autonomous task heartbeat settings</p>
+        <h1 className="text-2xl font-display font-bold text-[#f0ebe4] tracking-tight">Scheduler</h1>
+        <p className="text-[10px] text-[#3a3028] font-mono mt-1 uppercase tracking-wider">
+          Configure autonomous task heartbeat settings
+        </p>
       </div>
 
-      <div className="bg-gray-900 border border-gray-800 rounded-lg p-6 space-y-6">
+      {/* Settings card */}
+      <div className="border border-[#2c2520] rounded bg-[#1c1816] p-6 space-y-6">
         {/* Enable toggle */}
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm font-medium text-gray-200">Autonomous Tasks</p>
-            <p className="text-xs text-gray-500 mt-0.5">Enable the task scheduler heartbeat</p>
+            <p className="text-sm font-display font-semibold text-[#f0ebe4]">Autonomous Tasks</p>
+            <p className="text-[10px] text-[#5c5040] mt-0.5 font-mono">Enable the task scheduler heartbeat</p>
           </div>
           <button
             onClick={() => setConfig(c => c ? { ...c, enabled: !c.enabled } : c)}
-            className={`relative w-10 h-5 rounded-full transition-colors ${config.enabled ? 'bg-indigo-600' : 'bg-gray-700'}`}
+            className={`relative w-11 h-6 rounded-full border transition-all ${
+              config.enabled
+                ? 'bg-amber-600 border-amber-500 shadow-[0_0_10px_#d9770620]'
+                : 'bg-[#252018] border-[#3a3028]'
+            }`}
           >
-            <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white transition-transform ${config.enabled ? 'translate-x-5' : ''}`} />
+            <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-[#0a0907] border border-[#3a3028] transition-transform ${
+              config.enabled ? 'translate-x-[22px]' : 'translate-x-0.5'
+            }`} />
           </button>
         </div>
 
         {/* Heartbeat interval */}
         <div>
-          <label className="text-sm font-medium text-gray-200 block mb-2">Heartbeat Interval</label>
-          <div className="flex gap-2 mb-2">
+          <label className={labelClass}>Heartbeat Interval</label>
+          <div className="flex gap-2 mb-3">
             {INTERVAL_PRESETS.map(p => (
               <button
                 key={p.value}
                 onClick={() => setConfig(c => c ? { ...c, heartbeatIntervalMs: p.value } : c)}
-                className={`text-xs px-3 py-1.5 rounded-lg transition-colors ${config.heartbeatIntervalMs === p.value ? 'bg-indigo-700 text-white' : 'bg-gray-800 text-gray-400 hover:text-gray-200'}`}
+                className={`text-xs px-3 py-1.5 rounded border transition-all font-mono ${
+                  config.heartbeatIntervalMs === p.value
+                    ? 'bg-amber-900/60 text-amber-300 border-amber-700/60'
+                    : 'bg-[#141210] text-[#9c8f80] border-[#2c2520] hover:text-[#f0ebe4] hover:border-[#3a3028]'
+                }`}
               >
                 {p.label}
               </button>
@@ -78,54 +100,59 @@ export default function SchedulerPage() {
               onChange={e => setConfig(c => c ? { ...c, heartbeatIntervalMs: Number(e.target.value) } : c)}
               min={5000}
               step={1000}
-              className="w-32 bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-200 focus:outline-none focus:border-indigo-600"
+              className={`w-32 ${inputClass}`}
             />
-            <span className="text-xs text-gray-500">ms ({(config.heartbeatIntervalMs / 1000).toFixed(0)}s)</span>
+            <span className="text-[10px] text-[#5c5040] font-mono">
+              ms ({(config.heartbeatIntervalMs / 1000).toFixed(0)}s)
+            </span>
           </div>
         </div>
 
         {/* Max concurrent */}
         <div>
-          <label className="text-sm font-medium text-gray-200 block mb-2">Max Concurrent Tasks</label>
+          <label className={labelClass}>Max Concurrent Tasks</label>
           <input
             type="number"
             value={config.maxConcurrentTasks}
             onChange={e => setConfig(c => c ? { ...c, maxConcurrentTasks: Math.min(10, Math.max(1, Number(e.target.value))) } : c)}
             min={1} max={10}
-            className="w-24 bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-200 focus:outline-none focus:border-indigo-600"
+            className={`w-24 ${inputClass}`}
           />
-          <p className="text-xs text-gray-600 mt-1">How many tasks can run in parallel (1–10)</p>
+          <p className="text-[10px] text-[#3a3028] mt-1 font-mono">How many tasks can run in parallel (1–10)</p>
         </div>
 
         {/* Max request depth */}
         <div>
-          <label className="text-sm font-medium text-gray-200 block mb-2">Max Request Depth</label>
+          <label className={labelClass}>Max Request Depth</label>
           <input
             type="number"
             value={config.maxRequestDepth}
             onChange={e => setConfig(c => c ? { ...c, maxRequestDepth: Math.min(10, Math.max(1, Number(e.target.value))) } : c)}
             min={1} max={10}
-            className="w-24 bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-200 focus:outline-none focus:border-indigo-600"
+            className={`w-24 ${inputClass}`}
           />
-          <p className="text-xs text-gray-600 mt-1">Recursion depth for sub-task requests (1–10)</p>
+          <p className="text-[10px] text-[#3a3028] mt-1 font-mono">Recursion depth for sub-task requests (1–10)</p>
         </div>
 
         <button
           onClick={handleSave}
           disabled={saving}
-          className="flex items-center gap-2 bg-indigo-700 hover:bg-indigo-600 disabled:opacity-40 text-white px-4 py-2 rounded-lg text-sm transition-colors"
+          className="flex items-center gap-2 bg-amber-600 hover:bg-amber-500 disabled:opacity-40 text-stone-950 font-display font-bold px-4 py-2 rounded text-sm transition-colors"
         >
-          <Save size={14} />
+          <Save size={13} />
           {saved ? 'Saved!' : saving ? 'Saving…' : 'Save Settings'}
         </button>
       </div>
 
       {/* Status */}
-      <div className="mt-4 bg-gray-900 border border-gray-800 rounded-lg p-4">
+      <div className="mt-4 border border-[#2c2520] rounded bg-[#141210] p-4">
         <div className="flex items-center gap-2">
-          <Clock size={15} className={config.enabled ? 'text-green-400' : 'text-gray-600'} />
-          <span className="text-sm text-gray-300">
-            Scheduler is <span className={config.enabled ? 'text-green-400' : 'text-gray-500'}>{config.enabled ? 'enabled' : 'disabled'}</span>
+          <Clock size={14} className={config.enabled ? 'text-amber-400' : 'text-[#3a3028]'} />
+          <span className="text-xs text-[#9c8f80] font-mono">
+            Scheduler is{' '}
+            <span className={config.enabled ? 'text-amber-400' : 'text-[#3a3028]'}>
+              {config.enabled ? 'enabled' : 'disabled'}
+            </span>
             {config.enabled && ` — heartbeat every ${(config.heartbeatIntervalMs / 1000).toFixed(0)}s`}
           </span>
         </div>

@@ -17,27 +17,29 @@ import TaskDetailPage from './pages/TaskDetailPage'
 
 function AppLayout() {
   return (
-    <div className="flex h-screen bg-gray-950 text-gray-100 overflow-hidden">
+    <div className="flex h-screen bg-[#0a0907] text-[#f0ebe4] overflow-hidden font-mono">
       <Sidebar />
       <main className="flex-1 overflow-y-auto">
-        <Routes>
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
-          <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/orchestrator" element={<OrchestratorPage />} />
-          <Route path="/kanban" element={<KanbanPage />} />
-          <Route path="/kanban/:id" element={<TaskDetailPage />} />
-          <Route path="/notes" element={<NotesPage />} />
-          <Route path="/agents" element={<AgentsPage />} />
-          <Route path="/agents/new" element={<AgentEditPage />} />
-          <Route path="/agents/:name/edit" element={<AgentEditPage />} />
-          <Route path="/activity" element={<ActivityPage />} />
-          <Route path="/docs" element={<DocsPage />} />
-          <Route path="/reports" element={<ReportsPage />} />
-          <Route path="/channels" element={<ChannelsPage />} />
-          <Route path="/memory" element={<MemoryPage />} />
-          <Route path="/scheduler" element={<SchedulerPage />} />
-          <Route path="/settings" element={<SettingsPage />} />
-        </Routes>
+        <div className="animate-enter opacity-0" style={{ animationFillMode: 'forwards' }}>
+          <Routes>
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/orchestrator" element={<OrchestratorPage />} />
+            <Route path="/kanban" element={<KanbanPage />} />
+            <Route path="/kanban/:id" element={<TaskDetailPage />} />
+            <Route path="/notes" element={<NotesPage />} />
+            <Route path="/agents" element={<AgentsPage />} />
+            <Route path="/agents/new" element={<AgentEditPage />} />
+            <Route path="/agents/:name/edit" element={<AgentEditPage />} />
+            <Route path="/activity" element={<ActivityPage />} />
+            <Route path="/docs" element={<DocsPage />} />
+            <Route path="/reports" element={<ReportsPage />} />
+            <Route path="/channels" element={<ChannelsPage />} />
+            <Route path="/memory" element={<MemoryPage />} />
+            <Route path="/scheduler" element={<SchedulerPage />} />
+            <Route path="/settings" element={<SettingsPage />} />
+          </Routes>
+        </div>
       </main>
     </div>
   )

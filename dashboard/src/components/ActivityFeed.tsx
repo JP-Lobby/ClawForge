@@ -9,6 +9,14 @@ function relativeTime(ts: number): string {
   return `${Math.floor(diff / 86400000)}d ago`;
 }
 
+function dotColor(action: string): string {
+  if (action.includes('created')) return 'bg-amber-500';
+  if (action.includes('done') || action.includes('completed')) return 'bg-emerald-500';
+  if (action.includes('updated') || action.includes('moved')) return 'bg-cyan-500';
+  if (action.includes('deleted') || action.includes('error')) return 'bg-red-500';
+  return 'bg-[#3a3028]';
+}
+
 interface ActivityFeedProps {
   entries: ActivityEntry[];
   maxItems?: number;
@@ -18,28 +26,45 @@ interface ActivityFeedProps {
 export default function ActivityFeed({ entries, maxItems, showTaskLink }: ActivityFeedProps) {
   const displayed = maxItems ? entries.slice(0, maxItems) : entries;
 
-  if (!displayed.length) return <p className="text-gray-500 text-sm">No activity yet.</p>;
+  if (!displayed.length) {
+    return <p className="text-[#3a3028] text-xs font-mono">No activity yet.</p>;
+  }
 
   return (
-    <div className="space-y-2">
-      {displayed.map((entry) => (
-        <div key={entry.id} className="flex items-start gap-3 text-sm">
-          <span className="text-gray-500 shrink-0 mt-0.5 text-xs w-16">{relativeTime(entry.createdAt)}</span>
-          <div className="flex-1 min-w-0">
-            <span className="text-gray-300 font-medium">{entry.action}</span>
-            {showTaskLink && entry.taskId && (
-              <Link to={`/tasks/${entry.taskId}`} className="ml-2 text-xs text-indigo-400 hover:text-indigo-300 font-mono truncate">
-                {entry.taskId.slice(0, 8)}
-              </Link>
-            )}
-            {entry.details && <p className="text-gray-400 text-xs mt-0.5 truncate">{entry.details}</p>}
-            {entry.actorId && <span className="text-xs text-gray-600"> — {entry.actorId}</span>}
+    <div className="relative pl-5">
+      {/* vertical timeline line */}
+      <div className="absolute left-[7px] top-1 bottom-1 w-px bg-[#2c2520]" />
+      <div className="space-y-3">
+        {displayed.map((entry) => (
+          <div key={entry.id} className="flex items-start gap-3 relative">
+            <span
+              className={`absolute left-[-14px] top-1 w-2 h-2 rounded-full shrink-0 ${dotColor(entry.action)}`}
+            />
+            <div className="flex-1 min-w-0">
+              <span className="text-[#f0ebe4] text-xs font-medium">{entry.action}</span>
+              {showTaskLink && entry.taskId && (
+                <Link
+                  to={`/kanban/${entry.taskId}`}
+                  className="ml-2 text-[10px] text-amber-500 hover:text-amber-400 font-mono"
+                >
+                  {entry.taskId.slice(0, 8)}
+                </Link>
+              )}
+              {entry.details && (
+                <p className="text-[#5c5040] text-[10px] mt-0.5 truncate">{entry.details}</p>
+              )}
+              {entry.actorId && (
+                <span className="text-[10px] text-[#3a3028]"> — {entry.actorId}</span>
+              )}
+            </div>
+            <span className="text-[10px] text-[#3a3028] shrink-0 tabular-nums">
+              {relativeTime(entry.createdAt)}
+            </span>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 }
 
-// Named export for any legacy imports
 export { ActivityFeed }

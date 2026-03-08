@@ -67,38 +67,54 @@ export default function NotesPage() {
 
   return (
     <div className="flex h-full">
-      {/* Sidebar */}
-      <div className="w-56 border-r border-gray-800 flex flex-col bg-gray-900">
-        <div className="p-3 border-b border-gray-800 flex items-center justify-between">
-          <h1 className="text-sm font-bold text-gray-100">Notes</h1>
-          <button onClick={handleNew} className="text-indigo-400 hover:text-indigo-300 p-1 rounded">
-            <Plus size={16} />
+      {/* Note list sidebar */}
+      <div className="w-56 border-r border-[#2c2520] flex flex-col bg-[#141210]">
+        <div className="p-3 border-b border-[#2c2520] flex items-center justify-between">
+          <h1 className="text-xs font-display font-bold text-[#f0ebe4] tracking-wide">Notes</h1>
+          <button
+            onClick={handleNew}
+            className="text-amber-500 hover:text-amber-400 p-1 rounded transition-colors"
+          >
+            <Plus size={15} />
           </button>
         </div>
         <div className="flex-1 overflow-y-auto py-1">
-          {loading && <p className="text-xs text-gray-600 px-3 py-2">Loading…</p>}
+          {loading && (
+            <div className="px-3 py-2 space-y-1">
+              <div className="h-3 w-32 bg-[#252018] rounded animate-pulse" />
+              <div className="h-2 w-20 bg-[#1c1816] rounded animate-pulse" />
+            </div>
+          )}
           {isNew && (
-            <div className="px-3 py-2 bg-indigo-900/40 border-r-2 border-indigo-500">
-              <p className="text-sm text-indigo-300">New note…</p>
+            <div className="px-3 py-2.5 bg-amber-950/30 border-l-2 border-amber-400">
+              <p className="text-xs text-amber-300 font-mono">New note…</p>
             </div>
           )}
           {sorted.map(note => (
             <button
               key={note.id}
               onClick={() => setSelectedId(note.id)}
-              className={`w-full text-left px-3 py-2 transition-colors group ${selectedId === note.id ? 'bg-indigo-900/40 border-r-2 border-indigo-500' : 'hover:bg-gray-800'}`}
+              className={`w-full text-left px-3 py-2.5 transition-all ${
+                selectedId === note.id
+                  ? 'bg-amber-950/30 border-l-2 border-amber-400'
+                  : 'hover:bg-[#252018] border-l-2 border-transparent'
+              }`}
             >
               <div className="flex items-center gap-1.5">
-                {note.pinned && <Pin size={10} className="text-indigo-400 shrink-0" />}
-                <p className="text-xs text-gray-300 truncate flex-1">
+                {note.pinned && <Pin size={9} className="text-amber-400 shrink-0" />}
+                <p className="text-xs text-[#f0ebe4] truncate flex-1 font-mono">
                   {note.content.split('\n')[0].slice(0, 40) || 'Empty note'}
                 </p>
               </div>
-              <p className="text-[10px] text-gray-600 mt-0.5">{new Date(note.updatedAt).toLocaleDateString()}</p>
+              <p className="text-[9px] text-[#3a3028] mt-0.5 font-mono">
+                {new Date(note.updatedAt).toLocaleDateString()}
+              </p>
             </button>
           ))}
           {!loading && notes.length === 0 && !isNew && (
-            <p className="text-xs text-gray-600 px-3 py-4 text-center">No notes yet.<br />Click + to create one.</p>
+            <p className="text-[10px] text-[#3a3028] px-3 py-4 text-center font-mono">
+              No notes yet.<br />Click + to create one.
+            </p>
           )}
         </div>
       </div>
@@ -107,26 +123,40 @@ export default function NotesPage() {
       <div className="flex-1 flex flex-col">
         {(selectedId || isNew) ? (
           <>
-            <div className="flex items-center justify-between px-5 py-3 border-b border-gray-800">
-              <span className="text-xs text-gray-500">
-                {isNew ? 'New note (unsaved)' : `Last updated ${new Date(selected?.updatedAt ?? 0).toLocaleString()}`}
+            <div className="flex items-center justify-between px-5 py-3 border-b border-[#2c2520]">
+              <span className="text-[10px] text-[#3a3028] font-mono">
+                {isNew
+                  ? 'New note (unsaved)'
+                  : `Last updated ${new Date(selected?.updatedAt ?? 0).toLocaleString()}`
+                }
               </span>
               <div className="flex items-center gap-2">
                 {!isNew && selected && (
                   <>
                     <button
                       onClick={() => handlePin(selected.id, selected.pinned)}
-                      className={`flex items-center gap-1 text-xs px-2 py-1 rounded transition-colors ${selected.pinned ? 'text-indigo-400 bg-indigo-900/40' : 'text-gray-500 hover:text-gray-300'}`}
+                      className={`flex items-center gap-1 text-[10px] px-2 py-1 rounded transition-colors font-mono ${
+                        selected.pinned
+                          ? 'text-amber-300 bg-amber-950/40'
+                          : 'text-[#5c5040] hover:text-[#9c8f80]'
+                      }`}
                     >
-                      <Pin size={12} /> {selected.pinned ? 'Unpin' : 'Pin'}
+                      <Pin size={11} /> {selected.pinned ? 'Unpin' : 'Pin'}
                     </button>
-                    <button onClick={() => handleDelete(selected.id)} className="text-gray-600 hover:text-red-400 p-1 rounded transition-colors">
-                      <Trash2 size={14} />
+                    <button
+                      onClick={() => handleDelete(selected.id)}
+                      className="text-[#3a3028] hover:text-red-400 p-1 rounded transition-colors"
+                    >
+                      <Trash2 size={13} />
                     </button>
                   </>
                 )}
                 {isNew && (
-                  <button onClick={handleSaveNew} disabled={!draft.trim()} className="text-xs bg-indigo-700 hover:bg-indigo-600 disabled:opacity-40 text-white px-3 py-1.5 rounded-lg transition-colors">
+                  <button
+                    onClick={handleSaveNew}
+                    disabled={!draft.trim()}
+                    className="text-[10px] bg-amber-600 hover:bg-amber-500 disabled:opacity-40 text-stone-950 font-display font-semibold px-3 py-1.5 rounded transition-colors"
+                  >
                     Save
                   </button>
                 )}
@@ -136,27 +166,21 @@ export default function NotesPage() {
               value={draft}
               onChange={e => handleDraftChange(e.target.value)}
               placeholder="Write your note here… (Markdown supported)"
-              className="flex-1 bg-transparent text-sm text-gray-200 resize-none p-5 focus:outline-none placeholder-gray-700 font-mono leading-relaxed"
+              className="flex-1 bg-transparent text-xs text-[#f0ebe4] resize-none p-5 focus:outline-none placeholder-[#2c2520] font-mono leading-relaxed"
             />
           </>
         ) : (
           <div className="flex-1 flex items-center justify-center">
-            <div className="text-center text-gray-600">
-              <StickyNoteIcon />
-              <p className="text-sm mt-2">Select a note or create a new one</p>
+            <div className="text-center text-[#2c2520]">
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="mx-auto opacity-40">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <polyline points="14 2 14 8 20 8" />
+              </svg>
+              <p className="text-xs mt-3 font-mono">Select a note or create a new one</p>
             </div>
           </div>
         )}
       </div>
     </div>
-  )
-}
-
-function StickyNoteIcon() {
-  return (
-    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="mx-auto opacity-30">
-      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-      <polyline points="14 2 14 8 20 8" />
-    </svg>
   )
 }
