@@ -18,7 +18,7 @@ export function setConfig(config: Partial<ApiConfig>): void {
   if (config.authToken !== undefined) localStorage.setItem(AUTH_TOKEN_KEY, config.authToken);
 }
 
-export function getApiUrl(): string { return localStorage.getItem(API_URL_KEY) ?? 'http://localhost:3001'; }
+export function getApiUrl(): string { return localStorage.getItem(API_URL_KEY) ?? ''; }
 export function setApiUrl(url: string): void { localStorage.setItem(API_URL_KEY, url); }
 export function getAuthToken(): string { return localStorage.getItem(AUTH_TOKEN_KEY) ?? ''; }
 export function setAuthToken(token: string): void { localStorage.setItem(AUTH_TOKEN_KEY, token); }

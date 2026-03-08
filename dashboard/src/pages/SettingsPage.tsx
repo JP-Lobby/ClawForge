@@ -5,11 +5,9 @@ import { useApi } from '../hooks/useApi'
 import { CheckCircle, XCircle, RefreshCw, Save } from 'lucide-react'
 
 const API_URL_KEY = 'clawforge:apiUrl'
-const TOKEN_KEY = 'clawforge:authToken'
 
 export default function SettingsPage() {
   const [apiUrl, setApiUrl] = useState(() => localStorage.getItem(API_URL_KEY) ?? '')
-  const [token, setToken] = useState(() => localStorage.getItem(TOKEN_KEY) ?? '')
   const [saved, setSaved] = useState(false)
   const [orchestratorChannelId, setOrchestratorChannelId] = useState('')
   const [channelSaved, setChannelSaved] = useState(false)
@@ -28,7 +26,6 @@ export default function SettingsPage() {
 
   const handleSaveConnection = () => {
     localStorage.setItem(API_URL_KEY, apiUrl)
-    localStorage.setItem(TOKEN_KEY, token)
     setSaved(true)
     setTimeout(() => setSaved(false), 2000)
     window.location.reload()
@@ -73,10 +70,6 @@ export default function SettingsPage() {
           <div>
             <label className={labelClass}>API URL</label>
             <input value={apiUrl} onChange={e => setApiUrl(e.target.value)} className={inputClass} placeholder="http://100.65.59.79:3001" />
-          </div>
-          <div>
-            <label className={labelClass}>Auth Token</label>
-            <input value={token} onChange={e => setToken(e.target.value)} type="password" className={inputClass} placeholder="••••••••" />
           </div>
           <button onClick={handleSaveConnection} className={btnClass}>
             <Save size={13} /> {saved ? 'Saved!' : 'Save & Reload'}
