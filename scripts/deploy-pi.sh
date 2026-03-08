@@ -19,9 +19,9 @@ SERVICE_USER="${SUDO_USER:-$(whoami)}"
 
 echo "==> ClawForge Deploy: branch=$BRANCH skip-build=$SKIP_BUILD user=$SERVICE_USER"
 
-# Run a command as SERVICE_USER with their full environment (PATH, npm, pnpm, node)
+# Run a command as SERVICE_USER with their full login environment (.profile + .bashrc)
 run_as_user() {
-  su - "$SERVICE_USER" -c "cd '$REPO_DIR' && $*"
+  sudo -u "$SERVICE_USER" bash -l -c "cd '$REPO_DIR' && $*"
 }
 
 echo "==> Fetching latest..."
@@ -42,7 +42,7 @@ if [ "$SKIP_BUILD" = false ]; then
 fi
 
 echo "==> Installing systemd service..."
-NODE_BIN="$(su - "$SERVICE_USER" -c 'which node')"
+NODE_BIN="$(sudo -u "$SERVICE_USER" bash -l -c 'which node')"
 tee /etc/systemd/system/clawforge.service > /dev/null << EOF
 [Unit]
 Description=ClawForge Multi-Agent Orchestration
