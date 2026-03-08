@@ -146,12 +146,14 @@ node --version   # must print v20.x.x — do NOT use v22+
 # Install pnpm
 npm install -g pnpm
 
-# Install OpenClaw globally
-npm install -g openclaw
+# Install OpenClaw (official installer — NOT via npm)
+curl -fsSL https://openclaw.ai/install.sh | bash
 
-# Run once to generate ~/.openclaw/ and openclaw.json
-npx openclaw --version
-# Or: openclaw channels list  (will create config directory)
+# Reload shell so the openclaw command is found
+source ~/.bashrc   # or: exec $SHELL
+
+# Verify — should print the version number
+openclaw --version
 ```
 
 OpenClaw creates `~/.openclaw/openclaw.json` on first run:
@@ -328,7 +330,7 @@ Replace the placeholder values:
 
 After editing, restart both services:
 ```bash
-npx openclaw gateway restart   # picks up openclaw.json changes
+openclaw gateway restart   # picks up openclaw.json changes
 sudo systemctl restart clawforge  # picks up clawforge.json changes
 ```
 
@@ -933,7 +935,7 @@ fs.writeFileSync(path.join(dir, 'clawforge.json'), JSON.stringify(cf, null, 2));
 fs.writeFileSync(path.join(dir, 'openclaw.json'), JSON.stringify(src, null, 2));
 console.log('Done.');
 "
-npx openclaw gateway restart
+openclaw gateway restart
 sudo systemctl restart clawforge
 ```
 
