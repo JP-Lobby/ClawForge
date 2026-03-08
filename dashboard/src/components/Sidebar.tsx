@@ -1,17 +1,48 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, CheckSquare, Bot, Brain, Hash, FlaskConical, Activity, DollarSign, Settings } from 'lucide-react';
+import {
+  LayoutDashboard, Zap, Columns, StickyNote, Bot, Activity,
+  FolderOpen, BarChart2, Hash, Brain, Clock, Settings,
+} from 'lucide-react';
 import { useWebSocket } from '../hooks/useWebSocket.js';
 
-const links = [
-  { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-  { to: '/tasks', icon: CheckSquare, label: 'Tasks' },
-  { to: '/agents', icon: Bot, label: 'Agents' },
-  { to: '/memory', icon: Brain, label: 'Memory' },
-  { to: '/channels', icon: Hash, label: 'Channels' },
-  { to: '/research', icon: FlaskConical, label: 'Research' },
-  { to: '/activity', icon: Activity, label: 'Activity' },
-  { to: '/budget', icon: DollarSign, label: 'Budget' },
-  { to: '/settings', icon: Settings, label: 'Settings' },
+const groups = [
+  {
+    label: 'CONTROL',
+    links: [
+      { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+      { to: '/orchestrator', icon: Zap, label: 'Orchestrator' },
+    ],
+  },
+  {
+    label: 'WORK',
+    links: [
+      { to: '/kanban', icon: Columns, label: 'Kanban' },
+      { to: '/notes', icon: StickyNote, label: 'Notes' },
+    ],
+  },
+  {
+    label: 'INTELLIGENCE',
+    links: [
+      { to: '/agents', icon: Bot, label: 'Agents' },
+      { to: '/activity', icon: Activity, label: 'Activity' },
+    ],
+  },
+  {
+    label: 'DATA',
+    links: [
+      { to: '/docs', icon: FolderOpen, label: 'Docs' },
+      { to: '/reports', icon: BarChart2, label: 'Reports' },
+    ],
+  },
+  {
+    label: 'CONFIGURE',
+    links: [
+      { to: '/channels', icon: Hash, label: 'Channels' },
+      { to: '/memory', icon: Brain, label: 'Memory' },
+      { to: '/scheduler', icon: Clock, label: 'Scheduler' },
+      { to: '/settings', icon: Settings, label: 'Settings' },
+    ],
+  },
 ];
 
 export default function Sidebar() {
@@ -27,25 +58,32 @@ export default function Sidebar() {
         </div>
       </div>
       <div className="flex-1 py-2 overflow-y-auto">
-        {links.map(({ to, icon: Icon, label }) => (
-          <NavLink
-            key={to}
-            to={to}
-            className={({ isActive }) =>
-              `flex items-center gap-2.5 px-4 py-2 text-sm transition-colors ${
-                isActive
-                  ? 'bg-indigo-900/60 text-indigo-300 border-r-2 border-indigo-500'
-                  : 'text-gray-400 hover:bg-gray-800 hover:text-gray-200'
-              }`
-            }
-          >
-            <Icon size={15} />
-            {label}
-          </NavLink>
+        {groups.map((group) => (
+          <div key={group.label} className="mb-2">
+            <div className="px-4 py-1.5 text-[10px] font-semibold tracking-widest text-gray-600 uppercase">
+              {group.label}
+            </div>
+            {group.links.map(({ to, icon: Icon, label }) => (
+              <NavLink
+                key={to}
+                to={to}
+                className={({ isActive }) =>
+                  `flex items-center gap-2.5 px-4 py-2 text-sm transition-colors ${
+                    isActive
+                      ? 'bg-indigo-900/60 text-indigo-300 border-r-2 border-indigo-500'
+                      : 'text-gray-400 hover:bg-gray-800 hover:text-gray-200'
+                  }`
+                }
+              >
+                <Icon size={15} />
+                {label}
+              </NavLink>
+            ))}
+          </div>
         ))}
       </div>
     </nav>
   );
 }
 
-export { Sidebar }
+export { Sidebar };

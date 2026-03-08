@@ -61,7 +61,6 @@ export function loadAgent(
     handoffTo: parsed.handoffTo,
     canPickTasks: parsed.canPickTasks,
     taskPriorities: parsed.taskPriorities,
-    budgetMonthlyCents: parsed.budgetMonthlyCents,
   };
 
   agentCache.set(filePath, { agent, mtime });

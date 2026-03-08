@@ -15,6 +15,11 @@ import { createBudgetRouter } from './routes/budget.js';
 import { createChannelsRouter } from './routes/channels.js';
 import { createResearchRouter } from './routes/research.js';
 import { createProvidersRouter } from './routes/providers.js';
+import { createNotesRouter } from './routes/notes.js';
+import { createConfigRouter } from './routes/config.js';
+import { createOrchestratorRouter } from './routes/orchestrator.js';
+import { createReportsRouter } from './routes/reports.js';
+import { createSchedulerRouter } from './routes/scheduler.js';
 
 export async function startDashboardServer(config: ClawForgeConfig): Promise<DashboardServer> {
   const dashCfg: DashboardConfig = config.dashboard ?? { port: 3001, host: '0.0.0.0' };
@@ -45,6 +50,11 @@ export async function startDashboardServer(config: ClawForgeConfig): Promise<Das
   app.use('/api/channels', authMiddleware, createChannelsRouter(ctx));
   app.use('/api/research', authMiddleware, createResearchRouter(ctx));
   app.use('/api/providers', authMiddleware, createProvidersRouter(ctx));
+  app.use('/api/notes', authMiddleware, createNotesRouter(ctx));
+  app.use('/api/config', authMiddleware, createConfigRouter(ctx));
+  app.use('/api/orchestrate', authMiddleware, createOrchestratorRouter(ctx));
+  app.use('/api/reports', authMiddleware, createReportsRouter(ctx));
+  app.use('/api/scheduler', authMiddleware, createSchedulerRouter(ctx));
 
   // Serve static dashboard if built
   const __dirname = path.dirname(fileURLToPath(import.meta.url));

@@ -1,4 +1,4 @@
-export type TaskStatus = 'backlog' | 'todo' | 'in_progress' | 'blocked' | 'done' | 'failed' | 'cancelled';
+export type TaskStatus = 'backlog' | 'todo' | 'in_progress' | 'blocked' | 'done' | 'failed' | 'cancelled' | 'archive';
 export type TaskPriority = 'critical' | 'high' | 'medium' | 'low';
 
 export interface Task {
@@ -33,7 +33,6 @@ export interface ActivityEntry {
   createdAt: number;
 }
 
-// Legacy alias
 export type TaskActivityEntry = ActivityEntry;
 
 export interface TaskStats {
@@ -43,7 +42,6 @@ export interface TaskStats {
   blocked: number;
   done: number;
   cancelled: number;
-  // computed
   total: number;
   inProgress: number;
   completed: number;
@@ -61,7 +59,33 @@ export interface Agent {
   handoffTo?: string[];
   canPickTasks?: boolean;
   taskPriorities?: string[];
-  budgetMonthlyCents?: number;
+}
+
+export interface Note {
+  id: string;
+  content: string;
+  pinned: boolean;
+  createdAt: number;
+  updatedAt: number;
+}
+
+export interface SchedulerConfig {
+  enabled: boolean;
+  heartbeatIntervalMs: number;
+  maxConcurrentTasks: number;
+  maxRequestDepth: number;
+}
+
+export interface WeeklyReport {
+  period: string;
+  periodStart: number;
+  periodEnd: number;
+  tasksCreated: number;
+  tasksCompleted: number;
+  tasksByStatus: Record<string, number>;
+  tasksByAgent: Record<string, number>;
+  activityCount: number;
+  topAgents: { agent: string; count: number }[];
 }
 
 export interface MemoryStats {
@@ -120,6 +144,5 @@ export interface ProviderStatus {
   error?: string;
 }
 
-// Legacy aliases
 export type BudgetSummary = BudgetData;
 export type ProviderHealth = ProviderStatus;
