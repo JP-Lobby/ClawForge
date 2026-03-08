@@ -6,7 +6,8 @@
 set -e
 
 OPENCLAW_DIR="$HOME/.openclaw"
-CONFIG_FILE="$OPENCLAW_DIR/openclaw.json"
+CONFIG_FILE="$OPENCLAW_DIR/openclaw.json"      # OpenClaw's own file — never written by ClawForge
+CLAWFORGE_CONFIG="$OPENCLAW_DIR/clawforge.json" # ClawForge's own config — lives alongside
 
 GREEN='\033[0;32m'
 CYAN='\033[0;36m'
@@ -34,16 +35,15 @@ else
   USE_JQ=1
 fi
 
-# ─── Step 1: Check openclaw.json ──────────────────────────────────────────────
+# ─── Step 1: Check openclaw.json (OpenClaw's file — we just verify it exists) ─
 
 echo -e "${CYAN}Step 1: Checking ~/.openclaw/openclaw.json…${RESET}"
 if [ -f "$CONFIG_FILE" ]; then
-  echo -e "  ${GREEN}Found ✓${RESET}"
+  echo -e "  ${GREEN}Found ✓${RESET} (OpenClaw config — ClawForge will not modify it)"
 else
-  echo "  Not found — creating minimal config…"
+  echo -e "  ${YELLOW}Warning:${RESET} OpenClaw config not found. ClawForge will still work but"
+  echo    "  OpenClaw features (Discord gateway, etc.) need openclaw.json to be set up."
   mkdir -p "$OPENCLAW_DIR"
-  echo '{}' > "$CONFIG_FILE"
-  echo -e "  ${GREEN}Created ✓${RESET}"
 fi
 echo ""
 
@@ -51,11 +51,11 @@ echo ""
 
 echo -e "${CYAN}Step 2: Dashboard auth token${RESET}"
 
-# Read existing token if any
+# Read existing token from clawforge.json if any
 if [ $USE_JQ -eq 1 ]; then
-  EXISTING_TOKEN=$(jq -r '.dashboard.authToken // empty' "$CONFIG_FILE" 2>/dev/null || echo "")
+  EXISTING_TOKEN=$(jq -r '.dashboard.authToken // empty' "$CLAWFORGE_CONFIG" 2>/dev/null || echo "")
 else
-  EXISTING_TOKEN=$(node -e "try{const c=require('fs').readFileSync('$CONFIG_FILE','utf8');const j=JSON.parse(c);console.log(j.dashboard?.authToken||'')}catch{console.log('')}" 2>/dev/null || echo "")
+  EXISTING_TOKEN=$(node -e "try{const c=require('fs').readFileSync('$CLAWFORGE_CONFIG','utf8');const j=JSON.parse(c);console.log(j.dashboard?.authToken||'')}catch{console.log('')}" 2>/dev/null || echo "")
 fi
 
 if [ -n "$EXISTING_TOKEN" ]; then
@@ -100,38 +100,37 @@ for DIR in "${DIRS[@]}"; do
 done
 echo ""
 
-# ─── Step 4: Update openclaw.json ─────────────────────────────────────────────
+# ─── Step 4: Write clawforge.json (ClawForge's own config, separate from OpenClaw) ─
 
-echo -e "${CYAN}Step 4: Updating openclaw.json with ClawForge sections…${RESET}"
+echo -e "${CYAN}Step 4: Writing ~/.openclaw/clawforge.json…${RESET}"
 
 node - << NODESCRIPT
 const fs = require('fs');
 const path = require('path');
 
-const configPath = path.join(process.env.HOME, '.openclaw', 'openclaw.json');
+const configPath = path.join(process.env.HOME, '.openclaw', 'clawforge.json');
 let config = {};
 try { config = JSON.parse(fs.readFileSync(configPath, 'utf-8')); } catch {}
 
-// Merge ClawForge sections (preserve existing values)
+// Merge ClawForge sections (preserve existing values, always update token)
 config.dashboard = {
   enabled: true,
   port: 3001,
   host: '0.0.0.0',
-  authToken: '$AUTH_TOKEN',
   cors: true,
   ...(config.dashboard || {}),
-  authToken: '$AUTH_TOKEN', // always update token
+  authToken: '$AUTH_TOKEN',
 };
 
 config.orchestration = config.orchestration || {
   enabled: true,
-  agentsDir: '~/.openclaw/agents',
+  agentsDir: path.join(process.env.HOME, '.openclaw', 'agents'),
   providers: {},
 };
 
 config.tasks = config.tasks || {
   enabled: true,
-  dbPath: '~/.openclaw/data/tasks.db',
+  dbPath: path.join(process.env.HOME, '.openclaw', 'data', 'tasks.db'),
   autonomous: {
     enabled: false,
     heartbeatIntervalMs: 60000,
@@ -141,7 +140,7 @@ config.tasks = config.tasks || {
 };
 
 fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
-console.log('  openclaw.json updated ✓');
+console.log('  clawforge.json written ✓');
 NODESCRIPT
 
 echo ""
