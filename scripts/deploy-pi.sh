@@ -17,6 +17,17 @@ done
 echo "==> ClawForge Deploy: branch=$BRANCH skip-build=$SKIP_BUILD"
 cd "$REPO_DIR"
 
+# When run via sudo, pnpm lives in the invoking user's npm globals — not root's PATH
+SERVICE_USER="${SUDO_USER:-$(whoami)}"
+if ! command -v pnpm &>/dev/null; then
+  USER_NPM_BIN="$(su - "$SERVICE_USER" -c 'npm config get prefix' 2>/dev/null)/bin"
+  export PATH="$USER_NPM_BIN:$PATH"
+fi
+if ! command -v pnpm &>/dev/null; then
+  echo "==> ❌ pnpm not found. Run: npm install -g pnpm"
+  exit 1
+fi
+
 echo "==> Fetching latest..."
 git fetch origin
 git reset --hard "origin/$BRANCH"
@@ -47,7 +58,7 @@ After=network.target
 
 [Service]
 Type=simple
-User=$(whoami)
+User=$SERVICE_USER
 WorkingDirectory=$REPO_DIR
 ExecStart=$NODE_BIN --max-old-space-size=512 --expose-gc $REPO_DIR/dist/gateway/server.impl.js
 Restart=on-failure
